@@ -50,7 +50,7 @@ exports.orderList = async ( req, res ) =>
                         discount_given_by_customer: order.discount_given_by_customer,
                         order_timing: order.order_timing,
                         our_profit: order.our_profit
-                    }
+                    };
                 } ) );
 
                 orderlist.push( ...formattedOrders );
@@ -94,7 +94,7 @@ exports.orderList = async ( req, res ) =>
                         discount_given_by_customer: order.discount_given_by_customer,
                         order_timing: order.order_timing,
                         our_profit: order.our_profit
-                    }
+                    };
                 } ) );
 
                 orderlist.push( ...formattedOrders );
@@ -111,10 +111,10 @@ exports.orderList = async ( req, res ) =>
             orders: flatOrders
         };
 
-        return getResult( res, 200, data, "order list and counted fetched successfully." )
+        return getResult( res, 200, data, "order list and counted fetched successfully." );
     } catch ( error )
     {
-        console.log( "error in fetch order list and counted : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in fetch order list and counted : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

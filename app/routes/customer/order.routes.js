@@ -10,5 +10,7 @@ module.exports = app =>
 
     orderRouter.get( "/", orderController.getAllOrders );
 
-    app.use( '/api/customer/order', [ customerVerify.verifyAccessToken ], orderRouter )
+    orderRouter.delete( "/:id", orderController.deleteOrder );
+
+    app.use( '/api/customer/order', [ customerVerify.verifyAccessToken ], orderRouter );
 };

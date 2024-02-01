@@ -1,4 +1,3 @@
-const moment = require( 'moment' )
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const Op = db.Op;
@@ -45,10 +44,10 @@ exports.getOrderList = async ( req, res ) =>
         }
 
         const total_orders = await db.orders.findAll( orderOptions );
-        return getResult( res, 200, total_orders, "order list fetched successfully." )
+        return getResult( res, 200, total_orders, "order list fetched successfully." );
     } catch ( error )
     {
-        console.log( "error in fetch order list : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in fetch order list : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

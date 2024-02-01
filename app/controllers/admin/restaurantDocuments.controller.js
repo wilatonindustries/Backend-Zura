@@ -7,26 +7,38 @@ exports.addDocument = async ( req, res ) =>
 {
     try
     {
-        const userId = req.userId;
-        const type = req.body.type;
+        const { type, restaurant_id } = req.body;
         const documentField = getDocumentField( type );
 
-        const restaurant = await db.restaurants.findOne( { where: { user_id: userId } } )
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        if ( !restaurant )
+        {
+            return getErrorResult( res, 404, 'restaurant not found.' );
+        }
 
         const document = await db.restaurant_documents.findOne( {
             where: {
-                user_id: userId, restaurant_id: restaurant.id
+                user_id: restaurant.user_id, restaurant_id: restaurant.id
             }
-        } )
+        } );
         if ( document[ type ] === null )
         {
             await updateDocumentField(
                 documentField,
                 req.file,
                 restaurant.id,
-                userId
+                restaurant.user_id
             );
-            return getResult( res, 200, 1, `${ type } added or updated successfully.` )
+            const updatedDoc = await db.restaurant_documents.findOne( {
+                where: {
+                    restaurant_id: restaurant.id,
+                },
+            } );
+
+            const data = {
+                image: updatedDoc[ type ] ? `assets/${ updatedDoc[ type ] }` : null,
+            };
+            return getResult( res, 200, data, `${ type } added or updated successfully.` );
         } else
         {
             if ( req.file )
@@ -46,16 +58,25 @@ exports.addDocument = async ( req, res ) =>
                 documentField,
                 req.file,
                 restaurant.id,
-                userId
+                restaurant.user_id
             );
-            return getResult( res, 200, 1, `${ type } added or updated successfully.` )
+            const updatedDoc = await db.restaurant_documents.findOne( {
+                where: {
+                    restaurant_id: restaurant.id,
+                },
+            } );
+
+            const data = {
+                image: updatedDoc[ type ] ? `assets/${ updatedDoc[ type ] }` : null,
+            };
+            return getResult( res, 200, data, `${ type } added or updated successfully.` );
         }
     } catch ( error )
     {
-        console.log( `error in add ${ type } : `, error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( `error in add document : `, error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};
 
 function getDocumentField ( type )
 {

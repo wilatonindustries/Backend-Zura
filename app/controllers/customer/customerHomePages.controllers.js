@@ -16,13 +16,13 @@ exports.getCustomerHomePage = async ( req, res ) =>
             saved_till_date: 0,
             restaurant_list: restaurants,
         };
-        return getResult( res, 200, data, "customer home page fetched successfully." )
+        return getResult( res, 200, data, "customer home page fetched successfully." );
     } catch ( error )
     {
-        console.log( "error in fetching customer home page : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in fetching customer home page : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};
 
 exports.searchRestaurant = async ( req, res ) =>
 {
@@ -40,7 +40,7 @@ exports.searchRestaurant = async ( req, res ) =>
                 attributes: [ 'discount_json' ],
             } ],
             attributes: [ 'id', 'store_name', 'address', 'short_address' ],
-        }
+        };
         if ( category )
         {
             if ( category != 0 )
@@ -59,15 +59,17 @@ exports.searchRestaurant = async ( req, res ) =>
             restaurants = await db.restaurants.findAll( orderOptions );
             formattedRestaurants = restaurants.map( ( restaurant ) =>
             {
-                const discounts = JSON.parse( restaurant.discounts.discount_json )
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                    ? JSON.parse( restaurant.discounts.discount_json )
+                    : null;
 
                 return {
                     id: restaurant.id,
                     store_name: restaurant.store_name,
                     address: restaurant.address,
                     short_address: restaurant.short_address,
-                    discount: discounts
-                }
+                    discount: discounts ? discounts : []
+                };
             } );
         } else if ( offer )
         {
@@ -75,40 +77,46 @@ exports.searchRestaurant = async ( req, res ) =>
             {
                 orderOptions.order = [
                     [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), 'DESC' ],
-                ]
+                ];
                 restaurants = await db.restaurants.findAll( orderOptions );
                 formattedRestaurants = restaurants.map( ( restaurant ) =>
                 {
-                    const discounts = JSON.parse( restaurant.discounts.discount_json )
+                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                        ? JSON.parse( restaurant.discounts.discount_json )
+                        : null;
 
-                    discounts.sort( ( a, b ) => b.discount_percentage - a.discount_percentage );
-
+                    if ( Array.isArray( discounts ) )
+                    {
+                        discounts.sort( ( a, b ) => b.discount_percentage - a.discount_percentage );
+                    }
                     return {
                         id: restaurant.id,
                         store_name: restaurant.store_name,
                         address: restaurant.address,
                         short_address: restaurant.short_address,
-                        discount: discounts
-                    }
+                        discount: discounts ? discounts : []
+                    };
                 } );
             }
             else
             {
                 orderOptions.order = [
                     [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), 'ASC' ],
-                ]
+                ];
                 restaurants = await db.restaurants.findAll( orderOptions );
                 formattedRestaurants = restaurants.map( ( restaurant ) =>
                 {
-                    const discounts = JSON.parse( restaurant.discounts.discount_json )
+                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                        ? JSON.parse( restaurant.discounts.discount_json )
+                        : null;
 
                     return {
                         id: restaurant.id,
                         store_name: restaurant.store_name,
                         address: restaurant.address,
                         short_address: restaurant.short_address,
-                        discount: discounts
-                    }
+                        discount: discounts ? discounts : []
+                    };
                 } );
             }
         } else if ( startTime && endTime )
@@ -116,30 +124,38 @@ exports.searchRestaurant = async ( req, res ) =>
             restaurants = await db.restaurants.findAll( orderOptions );
             formattedRestaurants = restaurants.map( ( restaurant ) =>
             {
-                const discounts = JSON.parse( restaurant.discounts.discount_json )
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                    ? JSON.parse( restaurant.discounts.discount_json )
+                    : null;
 
-                discounts.forEach( ( discount ) =>
+                if ( discounts )
                 {
-                    discount.start_time = discount[ 'start_time ' ].trim();
-                    delete discount[ 'start_time ' ];
-                } );
+                    const filteredDiscounts = discounts.filter( ( discount ) =>
+                    {
+                        return (
+                            moment( discount.start_time, 'hh:mma' ).isSame( moment( startTime, 'hh:mma' ) ) &&
+                            moment( discount.end_time, 'hh:mma' ).isSame( moment( endTime, 'hh:mma' ) )
+                        );
+                    } );
 
-                const filteredDiscounts = discounts.filter( ( discount ) =>
+                    return {
+                        id: restaurant.id,
+                        store_name: restaurant.store_name,
+                        address: restaurant.address,
+                        short_address: restaurant.short_address,
+                        discount: filteredDiscounts.map( ( d ) => ( {
+                            discount_percentage: d.discount_percentage,
+                        } ) ),
+                    };
+                } else
                 {
-                    return (
-                        moment( discount.start_time, 'hh:mma' ).isSame( moment( startTime, 'hh:mma' ) ) &&
-                        moment( discount.end_time, 'hh:mma' ).isSame( moment( endTime, 'hh:mma' ) )
-                    );
-                } );
-
-                return {
-                    id: restaurant.id,
-                    store_name: restaurant.store_name,
-                    address: restaurant.address,
-                    short_address: restaurant.short_address,
-                    discount: filteredDiscounts.map( ( d ) => ( {
-                        discount_percentage: d.discount_percentage,
-                    } ) ),
+                    return {
+                        id: restaurant.id,
+                        store_name: restaurant.store_name,
+                        address: restaurant.address,
+                        short_address: restaurant.short_address,
+                        discount: [],
+                    };
                 }
             } );
         } else
@@ -147,24 +163,27 @@ exports.searchRestaurant = async ( req, res ) =>
             restaurants = await db.restaurants.findAll( orderOptions );
             formattedRestaurants = restaurants.map( ( restaurant ) =>
             {
-                const discounts = JSON.parse( restaurant.discounts.discount_json )
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                    ? JSON.parse( restaurant.discounts.discount_json )
+                    : null;
 
                 return {
                     id: restaurant.id,
                     store_name: restaurant.store_name,
                     address: restaurant.address,
                     short_address: restaurant.short_address,
-                    discount: discounts
-                }
+                    discount: discounts ? discounts : []
+                };
+
             } );
         }
         const data = {
             restaurants: formattedRestaurants
-        }
-        return getResult( res, 200, data, "restaurants fetched successfully." )
+        };
+        return getResult( res, 200, data, "restaurants fetched successfully." );
     } catch ( error )
     {
-        console.log( "error in search restaurants : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in search restaurants : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

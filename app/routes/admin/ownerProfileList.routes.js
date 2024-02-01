@@ -8,7 +8,7 @@ module.exports = app =>
 
     ownerRouter.post( "/profile-list", ownerController.getOwnerProfileListWithFilter );
 
-    ownerRouter.get( "/request-list", ownerController.getOwnerRequestList );
+    ownerRouter.put( "/remove/:id", ownerController.ownerRemove );
 
     ownerRouter.put( "/request/:id", ownerController.ownerRequest );
 

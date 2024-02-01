@@ -1,56 +1,87 @@
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 
-exports.createRestaurantDiscount = async ( req, res ) =>
+exports.defaultDiscount = () =>
 {
-    const userId = req.userId
-    const discountData = req.body;
+    const defaultValue = [
+        {
+            "start_time ": "07:00AM",
+            "end_time": "10:00AM",
+            "discount": 0,
+            "discount_percentage": 0,
+            "discount_commission": 0
+        },
+        {
+            "start_time ": "10:00AM",
+            "end_time": "12:00PM",
+            "discount": 0,
+            "discount_percentage": 0,
+            "discount_commission": 0
+        },
+        {
+            "start_time ": "12:00PM",
+            "end_time": "03:00PM",
+            "discount": 0,
+            "discount_percentage": 0,
+            "discount_commission": 0
+        },
+        {
+            "start_time ": "03:00PM",
+            "end_time": "07:00PM",
+            "discount": 0,
+            "discount_percentage": 0,
+            "discount_commission": 0
+        },
+        {
+            "start_time ": "07:00PM",
+            "end_time": "12:00AM",
+            "discount": 0,
+            "discount_percentage": 0,
+            "discount_commission": 0
+        }
+    ];
 
-    const restaurant = await db.restaurants.findOne( { where: { user_id: userId } } );
+    return defaultValue;
+};
 
-    await db.restaurant_discounts.update( {
-        discount_json: JSON.stringify( discountData ),
-    }, {
-        where: { restaurant_id: restaurant.id, user_id: userId },
-    } ).then( data =>
+exports.discountChanges = async ( req, res ) =>
+{
+    try
     {
-        return getResult( res, 200, data, "restaurant discount added or updated successfully." )
-    } ).catch( err =>
+        const id = req.params.id;
+        const { is_changes_accept } = req.body;
+
+        const restaurant = await db.restaurants.findByPk( id );
+        if ( !restaurant )
+        {
+            return getErrorResult( res, 400, `restaurant not found with id ${ id }.` );
+        }
+        if ( is_changes_accept === true )
+        {
+            const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
+            const updateDis = discount.changes_discount_json;
+
+            await db.restaurant_discounts.update( {
+                is_changes_accept,
+                discount_json: updateDis,
+                changes_discount_json: null
+            }, { where: { restaurant_id: restaurant.id } } );
+
+            const discountData = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
+            return getResult( res, 200, discountData, "discount changes accepted successfully." );
+        } else
+        {
+            await db.restaurant_discounts.update( {
+                is_changes_accept,
+                changes_discount_json: null
+            }, { where: { restaurant_id: restaurant.id } } );
+
+            const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
+            return getResult( res, 200, discount, "discount changes declined successfully." );
+        }
+    } catch ( error )
     {
-        console.log( "err in create restaurant discount : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
-    } )
-}
-
-// exports.updateRestaurantDiscount = async ( req, res ) =>
-// {
-//     const userId = req.userId;
-//     const discountData = req.body
-
-//     const restaurant = await db.restaurants.findOne( { where: { user_id: userId } } )
-//     if ( !restaurant )
-//     {
-//         return getErrorResult( res, 404, `restaurant not found with user id ${ userId }` )
-//     }
-
-//     const restaurantDis = await db.restaurant_discounts.findOne( { where: { user_id: userId, restaurant_id: restaurant.id } } )
-//     if ( !restaurantDis )
-//     {
-//         return getErrorResult( res, 404, `restaurant discount not found with user id ${ userId } and restaurant id ${ restaurant.id }` )
-//     }
-
-//     await db.restaurant_discounts.update( {
-//         discount_json: JSON.stringify( discountData ),
-//     }, {
-//         where: {
-//              user_id: userId, restaurant_id: restaurant.id
-//         }
-//     } ).then( data =>
-//     {
-//         return getResult( res, 200, data, "restaurant discount updated successfully." )
-//     } ).catch( err =>
-//     {
-//         console.log( "err in update restaurant discount : ", err );
-//         return getErrorResult( res, 500, 'somthing went wrong.' )
-//     } )
-// }
+        console.error( "error in discount changes : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
+};

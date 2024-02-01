@@ -1,7 +1,7 @@
 const moment = require( 'moment' );
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
-const Sequelize = db.Sequelize
+const Sequelize = db.Sequelize;
 
 exports.homePage = async ( req, res ) =>
 {
@@ -59,10 +59,10 @@ exports.homePage = async ( req, res ) =>
             total_sales, total_earnings
         };
 
-        return getResult( res, 200, data, "home page fetched successfully." )
+        return getResult( res, 200, data, "home page fetched successfully." );
     } catch ( error )
     {
-        console.log( "error in get home page for restaurant : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in get home page for restaurant : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

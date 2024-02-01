@@ -55,6 +55,9 @@ require( "./app/routes/admin/restaurant.routes.js" )( app );
 require( "./app/routes/admin/restaurantDocuments.routes.js" )( app );
 require( "./app/routes/admin/restaurantProfilePhotos.routes.js" )( app );
 require( "./app/routes/admin/restaurantDiscounts.routes.js" )( app );
+require( "./app/routes/admin/coupon.routes.js" )( app );
+require( "./app/routes/admin/restaurantCoupon.routes.js" )( app );
+require( "./app/routes/admin/dashboard.routes.js" )( app );
 
 require( "./app/routes/restaurant/auth.routes.js" )( app );
 require( "./app/routes/restaurant/orderList.routes.js" )( app );

@@ -22,7 +22,7 @@ exports.paymentSummery = async ( req, res ) =>
 
         if ( !restaurant )
         {
-            return getErrorResult( res, 404, `restaurant not found with id ${ id } ` )
+            return getErrorResult( res, 404, `restaurant not found with id ${ id } ` );
         } else
         {
             const discounts = JSON.parse( restaurant.discounts.discount_json );
@@ -46,7 +46,7 @@ exports.paymentSummery = async ( req, res ) =>
                 discountPercentage = filteredDiscount.discount_percentage;
             } else
             {
-                console.log( 'payment is NOT within discount time range.' );
+                console.error( 'payment is NOT within discount time range.' );
                 return getErrorResult( res, 500, 'Something went wrong. No applicable discount found.' );
             }
 
@@ -62,13 +62,13 @@ exports.paymentSummery = async ( req, res ) =>
                 discount_percentage: discountPercentage,
                 pay_bill_amount: discountedAmount,
                 razorpay_payment_link: paymentLink,
-            }
+            };
 
-            return getResult( res, 200, data, "payment summary fetched successfully." )
+            return getResult( res, 200, data, "payment summary fetched successfully." );
         }
     } catch ( error )
     {
-        console.log( "error in payment summary : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in payment summary : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

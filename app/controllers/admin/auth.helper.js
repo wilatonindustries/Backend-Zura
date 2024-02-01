@@ -1,6 +1,7 @@
 const config = require( "../../config/config" );
 const Jwt = require( "jsonwebtoken" );
 const bcrypt = require( 'bcryptjs' );
+const { getErrorResult } = require( "../../base/baseController" );
 
 exports.generateJwtToken = ( admin ) =>
 {
@@ -22,9 +23,10 @@ exports.generateHashPwd = async ( password ) =>
         return hashedPwd;
     } catch ( error )
     {
-        console.log( "error in generate hash password : ", error );
+        console.error( "error in generate hash password : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};
 
 exports.comparePwd = async ( Pwd, hashedPwd ) =>
 {
@@ -35,6 +37,7 @@ exports.comparePwd = async ( Pwd, hashedPwd ) =>
         return passwordMatch;
     } catch ( error )
     {
-        console.log( "error in generate hash password : ", error );
+        console.error( "error in generate hash password : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

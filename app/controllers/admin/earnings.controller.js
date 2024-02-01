@@ -1,8 +1,8 @@
 const { getResult, getErrorResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
-const Sequelize = db.Sequelize
-const Op = db.Op
+const Sequelize = db.Sequelize;
+const Op = db.Op;
 
 exports.totalEarningsWithFilter = async ( req, res ) =>
 {
@@ -150,14 +150,14 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
         const data = {
             total_earnings: await totalEarnings(),
             earnings: resultArray
-        }
-        return getResult( res, 200, data, "total earnings with filter successfully." )
+        };
+        return getResult( res, 200, data, "total earnings with filter successfully." );
     } catch ( error )
     {
         console.error( "error in total earnings with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};
 
 async function totalEarnings ()
 {

@@ -1,7 +1,7 @@
 module.exports = ( sequelize, Sequelize, DataTypes ) =>
 {
-    const RestaurantDiscounts = sequelize.define(
-        "restaurant_discounts", // Model name
+    const restaurantCoupons = sequelize.define(
+        "restaurant_coupons", // Model name
         {
             // Attributes
             id: {
@@ -23,24 +23,23 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 field: 'restaurant_id',
                 references: { model: 'restaurants', key: 'id' }
             },
-            discount_json: {
-                type: DataTypes.TEXT,
+            coupon_id: {
+                type: DataTypes.INTEGER,
                 allowNull: true,
-                field: 'discount_json',
+                field: 'coupon_id',
+                references: { model: 'coupons', key: 'id' }
             },
-            changes_discount_json: {
-                type: DataTypes.TEXT,
+            coupon_code: {
+                type: DataTypes.STRING,
                 allowNull: true,
-                field: 'changes_discount_json',
+                field: 'coupon_code'
             },
-            is_changes_accept: {
-                type: DataTypes.BOOLEAN,
-                allowNull: true,
-                field: 'is_changes_accept',
-                defaultValue: false
-            },
+        },
+        {
+            // Options
+            underscrored: true,
         }
     );
 
-    return RestaurantDiscounts;
+    return restaurantCoupons;
 };

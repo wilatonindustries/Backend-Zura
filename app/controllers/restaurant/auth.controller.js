@@ -14,22 +14,59 @@ exports.sendCode = async ( req, res ) =>
       let code = '123456';
       let date = new Date();
 
-      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true } } );
+      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true, is_active: true } } );
 
-      if ( !user )
+      if ( user )
       {
-        return getErrorResult( res, 400, 'Invalid credential.' )
-      }
+        const verificationCode = await db.user_verification_codes.findOne( {
+          where: { nametext: user.owner_mobile }
+        } );
 
-      const verificationCode = await db.user_verification_codes.findOne( {
-        where: { nametext: user.owner_mobile }
-      } );
+        if ( !verificationCode )
+        {
+          const createCode = await db.user_verification_codes.create( {
+            user_id: user.id,
+            nametext: user.owner_mobile,
+            type: 'MOBILE',
+            code,
+            expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 ),
+          } );
 
-      if ( !verificationCode )
+          if ( createCode )
+          {
+            return getResult( res, 200, 1, "code sent successfully." );
+          } else
+          {
+            return getErrorResult( res, 500, 'somthing went wrong.' );
+          }
+        }
+        else
+        {
+          const id = verificationCode.id;
+          const updateCode = await db.user_verification_codes.update(
+            {
+              code,
+              expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 )
+            },
+            {
+              where: { id }
+            } );
+
+          if ( updateCode )
+          {
+            return getResult( res, 200, 1, "code sent successfully." );
+          } else
+          {
+            return getErrorResult( res, 500, 'somthing went wrong.' );
+          }
+        }
+      } else
       {
+        const createUser = await db.user.create( { owner_mobile: mobile } );
+
         const createCode = await db.user_verification_codes.create( {
-          user_id: user.id,
-          nametext: user.owner_mobile,
+          user_id: createUser?.id,
+          nametext: createUser?.owner_mobile,
           type: 'MOBILE',
           code,
           expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 ),
@@ -37,39 +74,20 @@ exports.sendCode = async ( req, res ) =>
 
         if ( createCode )
         {
-          return getResult( res, 200, 1, "code sent successfully." )
+          return getResult( res, 200, 1, "code sent successfully." );
         } else
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
-        }
-      } else
-      {
-        const id = verificationCode.id
-        const updateCode = await db.user_verification_codes.update(
-          {
-            code,
-            expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 )
-          },
-          {
-            where: { id }
-          } );
-
-        if ( updateCode )
-        {
-          return getResult( res, 200, 1, "code sent successfully." )
-        } else
-        {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
+          return getErrorResult( res, 500, 'somthing went wrong.' );
         }
       }
     } else
     {
-      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' )
+      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
     }
   } catch ( error )
   {
-    console.log( "error in send code : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' )
+    console.error( "error in send code : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
   };
 };
 
@@ -84,11 +102,11 @@ exports.resendCode = async ( req, res ) =>
       let code = '123456';
       let date = new Date();
 
-      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true } } );
+      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true, is_active: true } } );
 
       if ( !user )
       {
-        return getErrorResult( res, 400, 'Invalid credential.' )
+        await db.user.create( { owner_name, owner_mobile, is_accept: true } );
       }
 
       const verificationCode = await db.user_verification_codes.findOne( {
@@ -108,14 +126,14 @@ exports.resendCode = async ( req, res ) =>
 
         if ( createCode )
         {
-          return getResult( res, 200, 1, "code sent successfully." )
+          return getResult( res, 200, 1, "code sent successfully." );
         } else
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
+          return getErrorResult( res, 500, 'somthing went wrong.' );
         }
       } else
       {
-        const id = verificationCode.id
+        const id = verificationCode.id;
         const updateCode = await db.user_verification_codes.update(
           {
             code,
@@ -127,22 +145,22 @@ exports.resendCode = async ( req, res ) =>
 
         if ( updateCode )
         {
-          return getResult( res, 200, 1, "code sent successfully." )
+          return getResult( res, 200, 1, "code sent successfully." );
         } else
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
+          return getErrorResult( res, 500, 'somthing went wrong.' );
         }
       }
     } catch ( error )
     {
-      console.log( "error in resend code : ", error );
-      return res.status( 500 ).json( { message: 'somthing went wrong' } )
+      console.error( "error in resend code : ", error );
+      return res.status( 500 ).json( { message: 'somthing went wrong' } );
     };
   } else
   {
-    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' )
+    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
   }
-}
+};
 
 exports.loginViaOtp = async ( req, res ) =>
 {
@@ -158,7 +176,7 @@ exports.loginViaOtp = async ( req, res ) =>
   {
     if ( !verficationCode )
     {
-      return getErrorResult( res, 400, 'Invalid verification code.' )
+      return getErrorResult( res, 400, 'Invalid verification code.' );
     } else
     {
       var date = new Date();
@@ -167,14 +185,16 @@ exports.loginViaOtp = async ( req, res ) =>
         new Date( verficationCode.expired_date.getTime() + date.getTimezoneOffset() * 60000 )
       )
       {
-        const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true } } );
+        const user = await db.user.findOne( { where: { owner_mobile: mobile, is_active: true } } );
 
         let accessToken = null;
 
         if ( !user )
         {
-          return getErrorResult( res, 400, 'Invalid credential.' )
+          return getErrorResult( res, 400, 'Invalid credential.' );
         }
+
+        const restaurant = await db.restaurants.findOne( { where: { user_id: user.id } } );
 
         accessToken = generateJwtToken( user );
 
@@ -183,20 +203,23 @@ exports.loginViaOtp = async ( req, res ) =>
           accessToken: accessToken,
           owner_name: user.owner_name || null,
           owner_mobile: user.owner_mobile || null,
-          is_social: user.is_social
-        }
-        return getResult( res, 200, result, "mobile verified successfully." )
+          is_social: user.is_social,
+          restaurant_id: restaurant?.id || null,
+          restaurant_name: restaurant?.store_name || null,
+          store_number: restaurant?.store_number || null
+        };
+        return getResult( res, 200, result, "mobile verified successfully." );
       } else
       {
-        return getErrorResult( res, 400, 'Invalid verification code.' )
+        return getErrorResult( res, 400, 'Invalid verification code.' );
       }
     }
   } ).catch( error =>
   {
-    console.log( "error in verify code : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' )
-  } )
-}
+    console.error( "error in verify code : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
+  } );
+};
 
 exports.updateProfile = async ( req, res ) =>
 {
@@ -213,53 +236,43 @@ exports.updateProfile = async ( req, res ) =>
       {
         let updateUser = await db.user.update( {
           owner_name: owner_name,
-          owner_mobile: userAuth.owner_mobile
+          owner_mobile: owner_mobile,
+          is_profile_updated: true,
         },
           {
             where: {
               id: userId
             }
-          } )
+          } );
         if ( !updateUser )
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
+          return getErrorResult( res, 500, 'somthing went wrong.' );
         }
-        await db.user.update( {
-          is_profile_updated: true,
-        },
-          {
-            where: { owner_mobile: userAuth.owner_mobile }
-          } )
       } else
       {
         let updateUser = await db.user.update( {
           owner_name: owner_name,
-          owner_mobile: owner_mobile
+          owner_mobile: owner_mobile,
+          is_profile_updated: true,
         },
           {
             where: {
               id: userId
             }
-          } )
+          } );
         if ( !updateUser )
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' )
+          return getErrorResult( res, 500, 'somthing went wrong.' );
         }
-        await db.user.update( {
-          is_profile_updated: true,
-        },
-          {
-            where: { email: userAuth.email }
-          } )
       }
     }
     return getResult( res, 200, 1, "profile updated successfully." );
   } catch ( error )
   {
-    console.log( "error in update profile : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' )
+    console.error( "error in update profile : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
   };
-}
+};
 
 exports.socialLogin = async ( req, res ) =>
 {
@@ -269,19 +282,21 @@ exports.socialLogin = async ( req, res ) =>
     const decryptedData = await decryptdata( data.data );
     const parsedData = decryptedData;
 
-    const user = await db.user.findOne( { where: { email: parsedData, is_accept: true } } );
+    const user = await db.user.findOne( { where: { email: parsedData, is_active: true } } );
 
     let accessToken = null;
     if ( !user )
     {
-      return getErrorResult( res, 400, 'Invalid credential.' )
+      return getErrorResult( res, 400, 'Invalid credential.' );
     } else
     {
       await db.user.update( {
         is_social: true,
       }, {
         where: { id: user.id }
-      } )
+      } );
+
+      const restaurant = await db.restaurants.findOne( { where: { user_id: user.id } } );
 
       accessToken = generateJwtToken( user );
 
@@ -291,13 +306,16 @@ exports.socialLogin = async ( req, res ) =>
         accessToken: accessToken,
         owner_name: user.owner_name || null,
         is_social: user.is_social,
+        restaurant_id: restaurant?.id || null,
+        restaurant_name: restaurant?.store_name || null,
+        store_number: restaurant?.store_number || null
       };
       return getResult( res, 200, resultnew, "user social login successfully." );
     }
   } catch ( error )
   {
-    console.log( "error in social login : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' )
+    console.error( "error in social login : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
   };
 };
 
@@ -310,7 +328,7 @@ exports.dataEncrypt = async ( req, res ) =>
     return getResult( res, 200, encryptedData, "data encrypted successfully." );
   } catch ( error )
   {
-    console.log( "error in data encrypt : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' )
+    console.error( "error in data encrypt : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
   };
 };

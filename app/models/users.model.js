@@ -56,6 +56,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
         field: 'is_accept',
         defaultValue: false,
       },
+      is_active: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        field: 'is_active',
+        defaultValue: true
+      },
     },
     {
       // Options

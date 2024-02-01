@@ -25,6 +25,14 @@ exports.getDataForFilter = ( filter ) =>
             startDate = currentDate.clone().subtract( 3, 'months' );
             endDate = currentDate.clone();
             break;
+        case 'last_six_month':
+            startDate = currentDate.clone().subtract( 6, 'months' );
+            endDate = currentDate.clone();
+            break;
+        case 'last_year':
+            startDate = currentDate.clone().subtract( 1, 'year' );
+            endDate = currentDate.clone();
+            break;
         default:
             throw new Error( 'Invalid filter' );
 

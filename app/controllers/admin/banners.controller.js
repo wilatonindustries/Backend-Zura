@@ -10,25 +10,25 @@ exports.create = async ( req, res ) =>
         image: req.file ? `${ bannerImagePath }/${ req.file.filename }` : null,
     } ).then( data =>
     {
-        return getResult( res, 200, data, "banner created successfully." )
+        return getResult( res, 200, data, "banner created successfully." );
     } ).catch( err =>
     {
-        console.log( "err in create banner : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
-    } )
-}
+        console.error( "err in create banner : ", err );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    } );
+};
 
 exports.findAll = async ( req, res ) =>
 {
     await db.banners.findAll()
         .then( data =>
         {
-            return getResult( res, 200, data, "get all banner successfully." )
+            return getResult( res, 200, data, "get all banner successfully." );
         } )
         .catch( err =>
         {
-            console.log( "err in get all banner : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' )
+            console.error( "err in get all banner : ", err );
+            return getErrorResult( res, 500, 'somthing went wrong.' );
         } );
 };
 
@@ -39,19 +39,19 @@ exports.findOne = async ( req, res ) =>
     await db.banners.findByPk( id )
         .then( data =>
         {
-            return getResult( res, 200, data, "get banner successfully." )
+            return getResult( res, 200, data, "get banner successfully." );
         } )
         .catch( err =>
         {
-            console.log( "err in get banner by id : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' )
+            console.error( "err in get banner by id : ", err );
+            return getErrorResult( res, 500, 'somthing went wrong.' );
         } );
 };
 
 exports.update = async ( req, res ) =>
 {
     const id = req.params.id;
-    let updatedValue = {}
+    let updatedValue = {};
 
     if ( req.body.name )
     {
@@ -82,13 +82,13 @@ exports.update = async ( req, res ) =>
         {
             if ( !data )
             {
-                return getErrorResult( res, 404, `banner was not found with id ${ id }` )
+                return getErrorResult( res, 404, `banner was not found with id ${ id }` );
             }
-            return getResult( res, 200, 1, "banner updated successfully." )
+            return getResult( res, 200, 1, "banner updated successfully." );
         } ).catch( err =>
         {
-            console.log( "err in update banner : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' )
+            console.error( "err in update banner : ", err );
+            return getErrorResult( res, 500, 'somthing went wrong.' );
         } );
 };
 
@@ -103,13 +103,13 @@ exports.deleteById = async ( req, res ) =>
         {
             if ( !data )
             {
-                return getErrorResult( res, 404, `banner was not found with id ${ id }` )
+                return getErrorResult( res, 404, `banner was not found with id ${ id }` );
             }
-            return getResult( res, 200, data, "banner deleted successfully." )
+            return getResult( res, 200, data, "banner deleted successfully." );
         } )
         .catch( err =>
         {
-            console.log( "err in delete banner : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' )
+            console.error( "err in delete banner : ", err );
+            return getErrorResult( res, 500, 'somthing went wrong.' );
         } );
 };

@@ -8,7 +8,7 @@ module.exports = app =>
 
     customerHomePagesRouter.get( "/", customerHomePagesController.getCustomerHomePage );
 
-    customerHomePagesRouter.get( "/search-restaurant", customerHomePagesController.searchRestaurant );
+    customerHomePagesRouter.post( "/search-restaurant", customerHomePagesController.searchRestaurant );
 
-    app.use( '/api/customer/home-page', customerHomePagesRouter )
+    app.use( '/api/customer/home-page', customerHomePagesRouter );
 };

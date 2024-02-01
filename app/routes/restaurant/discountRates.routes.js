@@ -6,9 +6,9 @@ module.exports = app =>
 
     const discontRateRouter = require( "express" ).Router();
 
-    discontRateRouter.get( "/discount-rates", discountRateController.getDiscountRates );
+    discontRateRouter.post( "/discount-rates", discountRateController.getDiscountRates );
 
     discontRateRouter.put( "/discount-rates", discountRateController.updateDiscountRates );
 
-    app.use( '/api/user/restaurant', [ authVerify.verifyAccessToken ], discontRateRouter )
+    app.use( '/api/user/restaurant', [ authVerify.verifyAccessToken ], discontRateRouter );
 };

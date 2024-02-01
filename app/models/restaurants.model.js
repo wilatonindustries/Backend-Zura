@@ -18,7 +18,7 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 references: { model: 'users', key: 'id' }
             },
             number: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 allowNull: true,
                 field: 'number'
             },
@@ -28,7 +28,7 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 field: 'store_name'
             },
             store_number: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.STRING,
                 allowNull: true,
                 field: 'store_number'
             },

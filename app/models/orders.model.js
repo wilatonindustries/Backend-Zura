@@ -69,6 +69,11 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 allowNull: true,
                 field: 'our_profit'
             },
+            discount_given_by_customer: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'discount_given_by_customer'
+            },
         },
         {
             // Options

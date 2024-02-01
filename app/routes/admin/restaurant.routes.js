@@ -7,6 +7,8 @@ module.exports = app =>
 
     const restaurantRouter = require( "express" ).Router();
 
+    restaurantRouter.put( "/owner/update", restaurantController.updateOwner );
+
     restaurantRouter.post( "/", restaurantController.createRestaurant );
 
     restaurantRouter.post( "/list", restaurantController.restaurantList );
@@ -18,6 +20,7 @@ module.exports = app =>
     restaurantRouter.put( "/:id", restaurantController.updateRestaurant );
 
     restaurantRouter.delete( "/:id", restaurantController.deleteRestaurantById );
+
 
     app.use( '/api/admin/store', [ adminVerify.verifyAccessToken ], restaurantRouter );
 };

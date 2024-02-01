@@ -1,5 +1,5 @@
 const { getResult, getErrorResult } = require( '../../base/baseController' );
-const db = require( '../../models' )
+const db = require( '../../models' );
 const { generateHashPwd, generateJwtToken, comparePwd } = require( "./auth.helper" );
 
 exports.createAdmin = async () =>
@@ -13,8 +13,8 @@ exports.createAdmin = async () =>
         mobile,
         email,
         password: hashedPwd
-    } )
-}
+    } );
+};
 
 exports.sendCode = async ( req, res ) =>
 {
@@ -24,7 +24,7 @@ exports.sendCode = async ( req, res ) =>
         let code = '123456';
         let date = new Date();
 
-        const admin = await db.admin.findOne( { where: { email: email } } )
+        const admin = await db.admin.findOne( { where: { email: email } } );
 
         const verificationCode = await db.admin_verification_codes.findOne( {
             where: { nametext: admin.mobile }
@@ -33,7 +33,7 @@ exports.sendCode = async ( req, res ) =>
         const matchPwd = await comparePwd( password, admin.password );
         if ( !matchPwd )
         {
-            return getErrorResult( res, 404, 'Invalid credential.' )
+            return getErrorResult( res, 404, 'Invalid credential.' );
         }
 
         if ( !verificationCode )
@@ -48,14 +48,14 @@ exports.sendCode = async ( req, res ) =>
 
             if ( createCode )
             {
-                return getResult( res, 200, 1, "code sent successfully." )
+                return getResult( res, 200, 1, "code sent successfully." );
             } else
             {
-                return getErrorResult( res, 500, 'somthing went wrong.' )
+                return getErrorResult( res, 500, 'somthing went wrong.' );
             }
         } else
         {
-            const id = verificationCode.id
+            const id = verificationCode.id;
             const updateCode = await db.admin_verification_codes.update(
                 {
                     admin_id: admin.id,
@@ -68,16 +68,16 @@ exports.sendCode = async ( req, res ) =>
 
             if ( updateCode )
             {
-                return getResult( res, 200, 1, "code sent successfully." )
+                return getResult( res, 200, 1, "code sent successfully." );
             } else
             {
-                return getErrorResult( res, 500, 'somthing went wrong.' )
+                return getErrorResult( res, 500, 'somthing went wrong.' );
             }
         }
     } catch ( error )
     {
         console.log( "error in send admin code : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     };
 };
 
@@ -89,7 +89,7 @@ exports.resendCode = async ( req, res ) =>
         let code = '123456';
         let date = new Date();
 
-        const admin = await db.admin.findOne( { where: { email: email } } )
+        const admin = await db.admin.findOne( { where: { email: email } } );
 
         const verificationCode = await db.admin_verification_codes.findOne( {
             attributes: [ 'id', 'expired_date' ],
@@ -108,14 +108,14 @@ exports.resendCode = async ( req, res ) =>
 
             if ( createCode )
             {
-                return getResult( res, 200, 1, "code sent successfully." )
+                return getResult( res, 200, 1, "code sent successfully." );
             } else
             {
-                return getResult( res, 200, 1, "code sent successfully." )
+                return getResult( res, 200, 1, "code sent successfully." );
             }
         } else
         {
-            const id = verificationCode.id
+            const id = verificationCode.id;
             const updateCode = await db.admin_verification_codes.update(
                 {
                     code,
@@ -127,18 +127,18 @@ exports.resendCode = async ( req, res ) =>
 
             if ( updateCode )
             {
-                return getResult( res, 200, 1, "code sent successfully." )
+                return getResult( res, 200, 1, "code sent successfully." );
             } else
             {
-                return getErrorResult( res, 500, 'somthing went wrong.' )
+                return getErrorResult( res, 500, 'somthing went wrong.' );
             }
         }
     } catch ( error )
     {
-        console.log( "error in resend customer code : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in resend customer code : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     };
-}
+};
 
 exports.verifyAdmin = async ( req, res ) =>
 {
@@ -152,10 +152,10 @@ exports.verifyAdmin = async ( req, res ) =>
                 code,
                 nametext: mobile
             }
-        } )
+        } );
         if ( !verificationCode )
         {
-            return getErrorResult( res, 400, 'Invalid verification code.' )
+            return getErrorResult( res, 400, 'Invalid verification code.' );
         } else
         {
             var date = new Date();
@@ -167,26 +167,26 @@ exports.verifyAdmin = async ( req, res ) =>
                 const admin = await db.admin.findOne( { where: { mobile } } );
                 if ( !admin )
                 {
-                    return getErrorResult( res, 404, 'admin not found with this mobile.' )
+                    return getErrorResult( res, 404, 'admin not found with this mobile.' );
                 }
 
                 const accessToken = generateJwtToken( admin );
 
                 const result = {
                     accessToken: accessToken
-                }
+                };
 
-                return getResult( res, 200, result, "admin login successfully." )
+                return getResult( res, 200, result, "admin login successfully." );
             }
             else
             {
-                return getErrorResult( res, 400, 'Invalid verification code.' )
+                return getErrorResult( res, 400, 'Invalid verification code.' );
             }
         }
 
     } catch ( error )
     {
-        console.log( "error in verify admin : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in verify admin : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     };
 };

@@ -39,12 +39,12 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                     bill_amount: billAmount,
                     gst: gst,
                     gst_amount: gstAmount
-                }
+                };
             } );
 
             gstAmt.push( ...gstData );
             return gstData;
-        } )
+        } );
         await Promise.all( ordersPromises );
 
         const totalGstAmount = gstAmt.reduce( ( total, order ) => total + order.gst_amount, 0 );
@@ -52,11 +52,11 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
         const data = {
             total_gst_bill: totalGstAmount,
             bill_details: gstAmt
-        }
-        return getResult( res, 200, data, "total GST calculated successfully." )
+        };
+        return getResult( res, 200, data, "total GST calculated successfully." );
     } catch ( error )
     {
         console.error( "error in total GST calculated : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};

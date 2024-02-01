@@ -6,7 +6,7 @@ module.exports = app =>
 
     const restaurantDiscountsRouter = require( "express" ).Router();
 
-    restaurantDiscountsRouter.post( "/discount", restaurantDiscountsController.createRestaurantDiscount );
+    restaurantDiscountsRouter.put( "/discount/changes/:id", restaurantDiscountsController.discountChanges );
 
     app.use( '/api/admin/restaurant', [ adminVerify.verifyAccessToken ], restaurantDiscountsRouter )
 };

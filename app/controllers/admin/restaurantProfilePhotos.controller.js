@@ -7,17 +7,20 @@ exports.addProfilePhoto = async ( req, res ) =>
 {
     try
     {
-        const userId = req.userId;
-        const type = req.body.type;
+        const { type, restaurant_id } = req.body;
         const profileField = getProfileField( type );
 
-        const restaurant = await db.restaurants.findOne( { where: { user_id: userId } } )
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        if ( !restaurant )
+        {
+            return getErrorResult( res, 404, 'restaurant not found.' );
+        }
 
         const profile = await db.restaurant_profile_photos.findOne( {
             where: {
-                user_id: userId, restaurant_id: restaurant.id
+                user_id: restaurant.user_id, restaurant_id: restaurant.id
             }
-        } )
+        } );
 
         if ( profile[ type ] === null )
         {
@@ -25,9 +28,18 @@ exports.addProfilePhoto = async ( req, res ) =>
                 profileField,
                 req.file,
                 restaurant.id,
-                userId
+                restaurant.user_id
             );
-            return getResult( res, 200, 1, `${ type } added or updated successfully.` )
+            const updatedProfile = await db.restaurant_profile_photos.findOne( {
+                where: {
+                    restaurant_id: restaurant.id,
+                },
+            } );
+
+            const data = {
+                image: updatedProfile[ type ] ? `assets/${ updatedProfile[ type ] }` : null,
+            };
+            return getResult( res, 200, data, `${ type } added or updated successfully.` );
         } else
         {
             if ( req.file )
@@ -47,16 +59,26 @@ exports.addProfilePhoto = async ( req, res ) =>
                 profileField,
                 req.file,
                 restaurant.id,
-                userId
+                restaurant.user_id
             );
-            return getResult( res, 200, 1, `${ type } added or updated successfully.` )
+
+            const updatedProfile = await db.restaurant_profile_photos.findOne( {
+                where: {
+                    restaurant_id: restaurant.id,
+                },
+            } );
+
+            const data = {
+                image: updatedProfile[ type ] ? `assets/${ updatedProfile[ type ] }` : null,
+            };
+            return getResult( res, 200, data, `${ type } added or updated successfully.` );
         }
     } catch ( error )
     {
-        console.log( "error in add ambience photo : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' )
+        console.error( "error in add profile photo : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
     }
-}
+};
 
 function getProfileField ( type )
 {
