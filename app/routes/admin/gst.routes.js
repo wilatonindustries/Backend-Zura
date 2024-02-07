@@ -6,7 +6,7 @@ module.exports = app =>
 
     const gstRouter = require( "express" ).Router();
 
-    gstRouter.post( "/bill-total", gstController.totalGstBillWithFilter );
+    gstRouter.post( "/total", gstController.totalGstBillWithFilter );
 
-    app.use( '/api/admin/gst', [ adminVerify.verifyAccessToken ], gstRouter )
+    app.use( '/api/admin/gst', [ adminVerify.verifyAccessToken ], gstRouter );
 };

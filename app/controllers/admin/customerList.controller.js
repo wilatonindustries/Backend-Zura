@@ -119,7 +119,7 @@ exports.customerList = async ( req, res ) =>
             total_customers: countCustomer,
             customers: customerlist
         };
-        return getResult( res, 200, data, "customers list and customer counted fetched successfully." );
+        return getResult( res, 200, data, "customers list fetched successfully." );
     } catch ( err )
     {
         console.error( "err in fetch customers list and customer counted : ", err );

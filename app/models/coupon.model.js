@@ -31,6 +31,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 allowNull: true,
                 field: 'unique_coupon_codes'
             },
+            discount: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'discount',
+                defaultValue: 0.00
+            },
         },
         {
             // Options

@@ -8,11 +8,13 @@ module.exports = app =>
 
     couponRouter.post( "/", couponController.createCoupon );
 
+    couponRouter.get( "/", couponController.getAllCoupon );
+
     couponRouter.get( '/:id', couponController.getCouponById );
 
     couponRouter.put( '/:id', couponController.updateCoupon );
 
     couponRouter.delete( '/:id', couponController.deleteCoupon );
 
-    app.use( '/api/admin/coupon', [ adminVerify.verifyAccessToken ], couponRouter )
+    app.use( '/api/admin/coupon', [ adminVerify.verifyAccessToken ], couponRouter );
 };

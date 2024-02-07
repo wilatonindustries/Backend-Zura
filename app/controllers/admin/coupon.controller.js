@@ -5,7 +5,7 @@ exports.createCoupon = async ( req, res ) =>
 {
     try
     {
-        const { description, status, coupon_quantity, unique_coupon_codes } = req.body;
+        const { description, status, coupon_quantity, unique_coupon_codes, discount } = req.body;
 
         const couponStatus = status === 'inactive' ? 'inactive' : 'active';
 
@@ -13,13 +13,33 @@ exports.createCoupon = async ( req, res ) =>
             description: description ? description : null,
             status: couponStatus,
             coupon_quantity: coupon_quantity,
-            unique_coupon_codes: unique_coupon_codes
+            unique_coupon_codes: unique_coupon_codes,
+            discount: discount
         } );
 
         return getResult( res, 200, createCoupon, "coupon created successfully." );
     } catch ( error )
     {
         console.error( "error in creating coupon  : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
+};
+
+exports.getAllCoupon = async ( req, res ) =>
+{
+    try
+    {
+        const coupon = await db.coupons.findAll();
+
+        if ( !coupon )
+        {
+            return getResult( res, 200, [], "coupon fetched successfully." );
+        }
+
+        return getResult( res, 200, coupon, " all coupons fetched successfully." );
+    } catch ( error )
+    {
+        console.error( "error in get all coupon  : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };
@@ -50,7 +70,7 @@ exports.updateCoupon = async ( req, res ) =>
     try
     {
         const id = req.params.id;
-        const { description, status, coupon_quantity } = req.body;
+        const { description, status, coupon_quantity, discount } = req.body;
 
         const coupon = await db.coupons.findByPk( id );
 
@@ -64,6 +84,7 @@ exports.updateCoupon = async ( req, res ) =>
             description: description ? description : coupon.description,
             status: couponStatus,
             coupon_quantity: coupon_quantity ? coupon_quantity : coupon.coupon_quantity,
+            discount: discount ? discount : coupon.discount
         }, { where: { id } } );
 
         return getResult( res, 200, updateCoupon, "coupon updated successfully." );

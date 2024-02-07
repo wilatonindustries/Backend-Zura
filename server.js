@@ -58,6 +58,10 @@ require( "./app/routes/admin/restaurantDiscounts.routes.js" )( app );
 require( "./app/routes/admin/coupon.routes.js" )( app );
 require( "./app/routes/admin/restaurantCoupon.routes.js" )( app );
 require( "./app/routes/admin/dashboard.routes.js" )( app );
+require( "./app/routes/admin/sales.routes.js" )( app );
+require( "./app/routes/admin/discountReceived.routes.js" )( app );
+require( "./app/routes/admin/rewardGivenCustomer.routes.js" )( app );
+require( "./app/routes/admin/storeShareGiven.routes.js" )( app );
 
 require( "./app/routes/restaurant/auth.routes.js" )( app );
 require( "./app/routes/restaurant/orderList.routes.js" )( app );

@@ -302,7 +302,6 @@ exports.updateRestaurant = async ( req, res ) =>
                     discount_json: JSON.stringify( discountData ),
                 }, {
                     where: {
-                        is_changes_accept: true,
                         restaurant_id: restaurant.id
                     }
                 } );

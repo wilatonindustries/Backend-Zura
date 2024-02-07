@@ -16,6 +16,8 @@ exports.createOrder = async ( req, res ) =>
         const start_time = orderStartTime;
         const end_time = orderEndTime;
 
+        const gst = 5;
+
         const customer = await db.customer.findOne( { where: { id: customerId } } );
         if ( !customer )
         {
@@ -28,12 +30,11 @@ exports.createOrder = async ( req, res ) =>
             return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
         }
 
-        const restaurantDiscount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id, } } );
+        const restaurantDiscount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
 
         const discounts = JSON.parse( restaurantDiscount.discount_json );
 
-        let discount_percentage = 0;
-        let discount_commision = 0;
+        let discount_percentage = 0, discount_commision = 0, discount_from_restaurant = 0;
 
         discounts.forEach( ( discount ) =>
         {
@@ -51,8 +52,22 @@ exports.createOrder = async ( req, res ) =>
             );
         } );
 
+        const restaurantCoupon = await db.restaurant_coupons.findOne( {
+            include: [
+                { model: db.coupons, as: 'coupon' },
+            ],
+            where: { restaurant_id: restaurant.id }
+        } );
+
+        let coupon_discount;
+        if ( restaurantCoupon )
+        {
+            coupon_discount = restaurantCoupon.coupon.discount;
+        }
+
         if ( filteredDiscount )
         {
+            discount_from_restaurant = filteredDiscount.discount;
             discount_percentage = filteredDiscount.discount_percentage;
             discount_commision = filteredDiscount.discount_commission;
         } else
@@ -63,8 +78,11 @@ exports.createOrder = async ( req, res ) =>
 
         const discount_by_customer = bill_amount * discount_percentage / 100;
         const profit = bill_amount * discount_commision / 100;
-        const gstRate = profit * restaurant.gst_rate / 100;
+        const gstRate = profit * gst / 100;
+        const magic_coupon_amount = bill_amount * coupon_discount / 100;
+        const gstAmt = bill_amount * gst / 100;
 
+        const discountGiven = discount_by_customer + magic_coupon_amount;
         const total_profit = profit - gstRate;
 
         const createOrder = await db.orders.create( {
@@ -74,11 +92,16 @@ exports.createOrder = async ( req, res ) =>
             order_date: Date.now(),
             transaction_id: generateTransactionId(),
             bill_amount: bill_amount,
-            gst: restaurant.gst_rate,
+            gst: gstAmt,
             discount_to_customer: discount_percentage,
             discount_given_by_customer: discount_by_customer,
             order_timing: order_timing,
             our_profit: total_profit,
+            magic_coupon_amount: magic_coupon_amount,
+            discount_from_restaurant: discount_from_restaurant,
+            discount_commision: discount_commision,
+            magic_coupon_discount: parseFloat( coupon_discount ),
+            discount_given: discountGiven,
         } );
 
         const data = {

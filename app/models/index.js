@@ -72,5 +72,4 @@ db.restaurant_coupons.belongsTo( db.coupons, { foreignKey: 'coupon_id', as: 'cou
 db.restaurants.hasOne( db.restaurant_coupons, { foreignKey: 'restaurant_id', as: 'restaurant_coupon' } );
 db.restaurant_coupons.belongsTo( db.restaurants, { foreignKey: 'restaurant_id', as: 'restaurant' } );
 
-
 module.exports = db;

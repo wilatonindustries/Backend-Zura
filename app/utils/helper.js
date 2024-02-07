@@ -51,7 +51,7 @@ exports.encryptData = async ( data ) =>
     {
         console.log( 'error in encryption : ', error );
     }
-}
+};
 
 exports.decryptdata = async ( data ) =>
 {
@@ -71,7 +71,7 @@ exports.decryptdata = async ( data ) =>
     {
         console.log( 'error in decryption : ', error );
     }
-}
+};
 
 exports.generateTransactionId = () =>
 {
@@ -79,4 +79,4 @@ exports.generateTransactionId = () =>
     const timestamp = Date.now();
     const transactionId = `${ prefix }${ timestamp }`;
     return transactionId;
-}
+};

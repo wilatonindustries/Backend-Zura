@@ -58,7 +58,6 @@ exports.updateDiscount = async ( req, res ) =>
     {
         const { restaurant_id, changes_discount_json } = req.body;
 
-
         const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
         if ( !restaurant )
         {
@@ -87,8 +86,6 @@ exports.updateDiscount = async ( req, res ) =>
                 }
             } );
         }
-
-
 
         const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
         return getResult( res, 200, discount, "restaurant discount updated successfully." );

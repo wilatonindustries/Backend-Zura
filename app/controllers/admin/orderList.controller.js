@@ -111,7 +111,7 @@ exports.orderList = async ( req, res ) =>
             orders: flatOrders
         };
 
-        return getResult( res, 200, data, "order list and counted fetched successfully." );
+        return getResult( res, 200, data, "order list  fetched successfully." );
     } catch ( error )
     {
         console.error( "error in fetch order list and counted : ", error );

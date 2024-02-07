@@ -60,12 +60,12 @@ exports.totalSalesWithFilter = async ( req, res ) =>
         );
         const resultArray = dateArray.map( ( date ) => ( {
             date: date.toISOString().split( 'T' )[ 0 ],
-            total_earnings: Number(
+            total_sales: Number(
                 expensesMap.get( date.toISOString().split( 'T' )[ 0 ] ) || 0
             )
         } ) );
 
-        return getResult( res, 200, resultArray, "total sales with filter successfully." );
+        return getResult( res, 200, resultArray, "total sales fetched successfully." );
     } catch ( error )
     {
         console.error( "error in total sales with filter : ", error );

@@ -175,7 +175,7 @@ exports.verifyCode = async ( req, res ) =>
                         device_name: device_name || null,
                         name: createCustomer?.name || null,
                         area_name: createCustomerDetail?.area_name || null,
-                        email: createCustomer?.email
+                        email: createCustomer?.email || null
                     };
                     return getResult( res, 200, result, "mobile verified successfully." );
                 }
@@ -201,7 +201,7 @@ exports.verifyCode = async ( req, res ) =>
                     device_name: device_name || null,
                     name: customer.name || null,
                     area_name: customerDetail?.area_name || null,
-                    email: customer.email
+                    email: customer.email || null
                 };
                 return getResult( res, 200, result, "mobile verified successfully." );
             } else

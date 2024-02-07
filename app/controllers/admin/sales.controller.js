@@ -4,7 +4,7 @@ const { getDataForFilter } = require( "../../utils/helper" );
 const Sequelize = db.Sequelize;
 const Op = db.Op;
 
-exports.totalEarningsWithFilter = async ( req, res ) =>
+exports.totalSalesWithFilter = async ( req, res ) =>
 {
     try
     {
@@ -30,28 +30,27 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                         where: {
                             store_name
                         },
-                        require: false
+                        required: false
                     },
                     {
                         model: db.customer,
-                        attributes: [ "id", "name" ],
+                        attributes: [ "id" ],
                         as: "customer",
                         where: {
                             name: customer_name
                         },
-                        require: false
+                        required: false
                     }
                 ],
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal(
-                            `COALESCE(
-                                SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100)
-                                + 10 - SUM(CAST(orders.discount_given AS DECIMAL)), 0
-                            )`
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
+                            0
                         ),
-                        'total_earnings'
+                        'total_sales'
                     ]
                 ],
                 where: {
@@ -80,13 +79,12 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal(
-                            `COALESCE(
-                                SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100)
-                                + 10 - SUM(CAST(orders.discount_given AS DECIMAL)), 0
-                            )`
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
+                            0
                         ),
-                        'total_earnings'
+                        'total_sales'
                     ]
                 ],
                 where: {
@@ -104,24 +102,23 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 include: [
                     {
                         model: db.customer,
-                        attributes: [ "id", "name" ],
+                        attributes: [ "id" ],
                         as: "customer",
                         where: {
                             name: customer_name
                         },
-                        require: false
+                        required: false
                     }
                 ],
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal(
-                            `COALESCE(
-                                SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100)
-                                + 10 - SUM(CAST(orders.discount_given AS DECIMAL)), 0
-                            )`
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
+                            0
                         ),
-                        'total_earnings'
+                        'total_sales'
                     ]
                 ],
                 where: {
@@ -139,13 +136,12 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal(
-                            `COALESCE(
-                                SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100)
-                                + 10 - SUM(CAST(orders.discount_given AS DECIMAL)), 0
-                            )`
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
+                            0
                         ),
-                        'total_earnings'
+                        'total_sales'
                     ]
                 ],
                 where: {
@@ -158,90 +154,45 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 order: [ [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'ASC' ] ]
             } );
         }
-
         const expensesMap = new Map(
             orders.map( ( order ) => [
                 order.get( 'date' ),
-                order.get( 'total_earnings' )
+                order.get( 'total_sales' )
             ] )
         );
         const resultArray = dateArray.map( ( date ) => ( {
             date: date.toISOString().split( 'T' )[ 0 ],
-            total_earnings: Number(
+            total_sales: Number(
                 expensesMap.get( date.toISOString().split( 'T' )[ 0 ] ) || 0
             )
         } ) );
 
         const data = {
-            total_earnings: await totalEarnings(),
-            earnings: resultArray
+            total_sales: await totalSales(),
+            sales: resultArray
         };
-        return getResult( res, 200, data, "total earnings fetched successfully." );
+
+        return getResult( res, 200, data, "total sales fetched successfully." );
     } catch ( error )
     {
-        console.error( "error in total earnings with filter : ", error );
+        console.error( "error in fetch total sales with filter : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };
 
-async function totalEarnings ()
+async function totalSales ()
 {
-    const conenience_fee = 10;
-    const totalDiscountReceived = await discountReceived();
-    const total_dis_given = await totalDiscountGiven();
-
-    const earnings = totalDiscountReceived + conenience_fee;
-
-    const givenDisPr = earnings * total_dis_given / 100;
-
-    const result = earnings - givenDisPr;
-
-    return result;
-}
-
-async function discountReceived ()
-{
-    const result = await db.orders.findAll( {
+    const total_sales = await db.orders.findAll( {
         attributes: [
             [
                 Sequelize.fn(
                     'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
+                    Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
                     0
                 ),
                 'total_sales'
-            ],
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'discount_from_restaurant' ) ),
-                    0
-                ),
-                'discount_from_restaurant'
             ]
         ],
     } );
-
-    const total_sales_res = parseFloat( result[ 0 ].dataValues.total_sales );
-    const discount_from_restaurant_res = parseFloat( result[ 0 ].dataValues.discount_from_restaurant );
-
-    const total_discount_received = total_sales_res * discount_from_restaurant_res / 100;
-
-    return total_discount_received;
-}
-
-async function totalDiscountGiven ()
-{
-    const result = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.literal( 'COALESCE(SUM(CAST(orders.discount_to_customer AS DECIMAL)) + (SUM(CAST(orders.magic_coupon_discount AS DECIMAL))), 0)' ),
-                'total_discount_given'
-            ]
-        ],
-    } );
-
-    const total_discount_given = parseFloat( result[ 0 ].dataValues.total_discount_given );
-
-    return total_discount_given;
+    return total_sales;
 }

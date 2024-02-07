@@ -35,10 +35,12 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
             attributes: [
                 [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                 [
-                    Sequelize.fn(
-                        'COALESCE',
-                        Sequelize.fn( 'SUM', Sequelize.col( 'orders.our_profit' ) ),
-                        0
+                    Sequelize.literal(
+                        `COALESCE(
+                                SUM(CAST(orders.bill_amount AS DECIMAL)) -
+                                (SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100) + 10),
+                                0
+                            )`
                     ),
                     'total_earnings'
                 ]
@@ -65,10 +67,10 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
             )
         } ) );
 
-        return getResult( res, 200, resultArray, "total earnings with filter successfully." );
+        return getResult( res, 200, resultArray, "total earnings fetched successfully." );
     } catch ( error )
     {
-        console.error( "error in total earnings with filter : ", error );
+        console.error( "error in fetch total earnings with filter : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };
