@@ -42,44 +42,19 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
             bill_amount: {
                 type: DataTypes.DECIMAL,
                 allowNull: true,
-                field: 'bill_amount'
-            },
-            gst: {
-                type: DataTypes.DECIMAL,
-                allowNull: true,
-                field: 'gst'
-            },
-            discount_to_customer: {
-                type: DataTypes.DECIMAL,
-                allowNull: true,
-                field: 'discount_to_customer',
-                defaultValue: 0
-            },
-            discount_given_by_customer: {
-                type: DataTypes.DECIMAL,
-                allowNull: true,
-                field: 'discount_given_by_customer'
-            },
-            order_timing: {
-                type: DataTypes.STRING,
-                allowNull: true,
-                field: 'order_timing'
-            },
-            our_profit: {
-                type: DataTypes.DECIMAL,
-                allowNull: true,
-                field: 'our_profit'
-            },
-            magic_coupon_amount: {
-                type: DataTypes.DECIMAL,
-                allowNull: true,
-                field: 'magic_coupon_amount',
+                field: 'bill_amount',
                 defaultValue: 0.00
             },
             discount_from_restaurant: {
                 type: DataTypes.DECIMAL,
                 allowNull: true,
                 field: 'discount_from_restaurant',
+                defaultValue: 0.00
+            },
+            discount_to_customer: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'discount_to_customer',
                 defaultValue: 0.00
             },
             discount_commision: {
@@ -94,17 +69,82 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 field: 'magic_coupon_discount',
                 defaultValue: 0.00
             },
-            is_paid: {
-                type: DataTypes.BOOLEAN,
+            convinence_fee: {
+                type: DataTypes.DECIMAL,
                 allowNull: true,
-                field: 'is_paid',
-                defaultValue: false,
+                field: 'convinence_fee',
+                defaultValue: 0.00
+            },
+            gst: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'gst',
+                defaultValue: 0.00
+            },
+            dis_to_customer: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'dis_to_customer',
+                defaultValue: 0.00
+            },
+            amt_pay_by_customer: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'amt_pay_by_customer',
+                defaultValue: 0.00
+            },
+            dis_receive_by_res: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'dis_receive_by_res',
+                defaultValue: 0.00
+            },
+            commission_by_admin: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'commission_by_admin',
+                defaultValue: 0.00
+            },
+            magic_coupon_amount: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'magic_coupon_amount',
+                defaultValue: 0.00
+            },
+            gst_rate: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'gst_rate',
+                defaultValue: 0.00
+            },
+            gst_amt: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'gst_amt',
+                defaultValue: 0.00
+            },
+            given_to_res: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'given_to_res',
+                defaultValue: 0.00
             },
             discount_given: {
                 type: DataTypes.DECIMAL,
                 allowNull: true,
                 field: 'discount_given',
                 defaultValue: 0.00
+            },
+            is_paid: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true,
+                field: 'is_paid',
+                defaultValue: false,
+            },
+            order_timing: {
+                type: DataTypes.STRING,
+                allowNull: true,
+                field: 'order_timing'
             },
         },
         {

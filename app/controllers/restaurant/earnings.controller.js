@@ -35,12 +35,10 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
             attributes: [
                 [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                 [
-                    Sequelize.literal(
-                        `COALESCE(
-                                SUM(CAST(orders.bill_amount AS DECIMAL)) -
-                                (SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100) + 10),
-                                0
-                            )`
+                    Sequelize.fn(
+                        'COALESCE',
+                        Sequelize.fn( 'SUM', Sequelize.col( 'orders.given_to_res' ) ),
+                        0
                     ),
                     'total_earnings'
                 ]

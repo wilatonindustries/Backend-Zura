@@ -25,7 +25,7 @@ exports.getDataForFilter = ( filter ) =>
             startDate = currentDate.clone().subtract( 3, 'months' );
             endDate = currentDate.clone();
             break;
-        case 'last_six_month':
+        case 'last_six_months':
             startDate = currentDate.clone().subtract( 6, 'months' );
             endDate = currentDate.clone();
             break;

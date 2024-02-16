@@ -8,5 +8,5 @@ module.exports = app =>
 
     earningRouter.post( "/total", earningController.totalEarningsWithFilter );
 
-    app.use( '/api/admin/earnigs', [ adminVerify.verifyAccessToken ], earningRouter )
+    app.use( '/api/admin/earnings', [ adminVerify.verifyAccessToken ], earningRouter );
 };

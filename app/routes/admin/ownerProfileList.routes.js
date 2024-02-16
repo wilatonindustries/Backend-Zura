@@ -12,5 +12,5 @@ module.exports = app =>
 
     ownerRouter.put( "/request/:id", ownerController.ownerRequest );
 
-    app.use( '/api/admin/owner', [ adminVerify.verifyAccessToken ], ownerRouter )
+    app.use( '/api/admin/owner', [ adminVerify.verifyAccessToken ], ownerRouter );
 };

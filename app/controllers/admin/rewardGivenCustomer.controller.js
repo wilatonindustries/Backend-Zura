@@ -21,7 +21,9 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     },
@@ -30,7 +32,9 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -40,7 +44,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "discount_given_by_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
+                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
             } );
 
             orders.forEach( order =>
@@ -56,7 +60,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
                     customer_name: customer ? customer.name : '',
-                    bill_amount: order.bill_amount,
+                    bill_amount: parseFloat( order.bill_amount ),
                     discount: discount,
                     discount_given_worth: discountWorth
                 } );
@@ -70,7 +74,9 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     },
@@ -86,7 +92,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "discount_given_by_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
+                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
             } );
 
             orders.forEach( order =>
@@ -102,7 +108,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
                     customer_name: customer ? customer.name : '',
-                    bill_amount: order.bill_amount,
+                    bill_amount: parseFloat( order.bill_amount ),
                     discount: discount,
                     discount_given_worth: discountWorth
                 } );
@@ -122,7 +128,9 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -132,7 +140,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "discount_given_by_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
+                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
             } );
 
             orders.forEach( order =>
@@ -148,7 +156,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
                     customer_name: customer ? customer.name : '',
-                    bill_amount: order.bill_amount,
+                    bill_amount: parseFloat( order.bill_amount ),
                     discount: discount,
                     discount_given_worth: discountWorth
                 } );
@@ -175,7 +183,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "discount_given_by_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
+                attributes: [ "id", "order_date", "bill_amount", "discount_to_customer", "magic_coupon_amount", "magic_coupon_discount", "discount_given" ]
             } );
 
             orders.forEach( order =>
@@ -191,7 +199,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
                     customer_name: customer ? customer.name : '',
-                    bill_amount: order.bill_amount,
+                    bill_amount: parseFloat( order.bill_amount ),
                     discount: discount,
                     discount_given_worth: discountWorth
                 } );
@@ -205,10 +213,8 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
             totalDiscountGivenWorth += parseFloat( order.discount_given_worth );
         }
 
-        const total_reward_given_to_customer = await totalRewardGivenToCustomer();
-
         const data = {
-            total_reward_given_to_customer,
+            total_reward_given_to_customer: await totalRewardGivenToCustomer(),
             reward_given_to_customer_list: orderList,
             totals: {
                 total_bill_amount: totalBillAmount,
@@ -226,14 +232,20 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
 
 async function totalRewardGivenToCustomer ()
 {
-    const total_reward_given_to_customer = await db.orders.findAll( {
+    const result = await db.orders.findAll( {
         attributes: [
             [
-                Sequelize.literal( 'COALESCE(SUM(CAST(orders.discount_given AS DECIMAL)), 0)' ),
+                Sequelize.fn(
+                    'COALESCE',
+                    Sequelize.fn( 'SUM', Sequelize.col( 'discount_given' ) ),
+                    0
+                ),
                 'total_reward_given_to_customer'
-            ]
+            ],
         ],
     } );
+
+    const total_reward_given_to_customer = parseFloat( result[ 0 ].dataValues.total_reward_given_to_customer );
 
     return total_reward_given_to_customer;
 }

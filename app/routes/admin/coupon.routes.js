@@ -8,7 +8,9 @@ module.exports = app =>
 
     couponRouter.post( "/", couponController.createCoupon );
 
-    couponRouter.get( "/", couponController.getAllCoupon );
+    couponRouter.post( "/list", couponController.getCouponByCode );
+
+    couponRouter.post( '/fetch', couponController.getCoupons );
 
     couponRouter.get( '/:id', couponController.getCouponById );
 

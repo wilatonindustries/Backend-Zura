@@ -1,5 +1,7 @@
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
+const { getDataForFilter } = require( "../../utils/helper" );
+const Op = db.Op;
 
 exports.createCoupon = async ( req, res ) =>
 {
@@ -25,24 +27,71 @@ exports.createCoupon = async ( req, res ) =>
     }
 };
 
-exports.getAllCoupon = async ( req, res ) =>
+exports.getCouponByCode = async ( req, res ) =>
 {
     try
     {
-        const coupon = await db.coupons.findAll();
+        const { code, filter } = req.body;
+        const [ startDate, endDate ] = getDataForFilter( filter );
 
-        if ( !coupon )
+        let coupon;
+
+        if ( code )
         {
-            return getResult( res, 200, [], "coupon fetched successfully." );
+            coupon = await db.coupons.findAll( {
+                where: {
+                    unique_coupon_codes: code, createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                }
+            } );
+        } else
+        {
+            coupon = await db.coupons.findAll( {
+                where: {
+                    createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                }
+            } );
         }
 
-        return getResult( res, 200, coupon, " all coupons fetched successfully." );
+        return getResult( res, 200, coupon, "coupons fetched successfully." );
     } catch ( error )
     {
-        console.error( "error in get all coupon  : ", error );
+        console.error( "error in get coupon  : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };
+
+exports.getCoupons = async ( req, res ) =>
+{
+    try
+    {
+        const { filter } = req.body;
+        const [ startDate, endDate ] = getDataForFilter( filter );
+
+        const countCoupon = await db.coupons.count();
+        const coupon = await db.coupons.findAll( {
+            where: {
+                createdAt: {
+                    [ Op.between ]: [ startDate, endDate ]
+                }
+            }
+        } );
+
+        const data = {
+            countCoupon, coupon
+        };
+
+        return getResult( res, 200, data, "coupons fetched successfully." );
+    } catch ( error )
+    {
+        console.error( "error in get coupon  : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
+};
+
 
 exports.getCouponById = async ( req, res ) =>
 {
@@ -70,7 +119,7 @@ exports.updateCoupon = async ( req, res ) =>
     try
     {
         const id = req.params.id;
-        const { description, status, coupon_quantity, discount } = req.body;
+        const { description, status, coupon_quantity, discount, unique_coupon_codes } = req.body;
 
         const coupon = await db.coupons.findByPk( id );
 
@@ -84,7 +133,8 @@ exports.updateCoupon = async ( req, res ) =>
             description: description ? description : coupon.description,
             status: couponStatus,
             coupon_quantity: coupon_quantity ? coupon_quantity : coupon.coupon_quantity,
-            discount: discount ? discount : coupon.discount
+            discount: discount ? discount : coupon.discount,
+            unique_coupon_codes: unique_coupon_codes ? unique_coupon_codes : coupon.unique_coupon_codes
         }, { where: { id } } );
 
         return getResult( res, 200, updateCoupon, "coupon updated successfully." );

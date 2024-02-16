@@ -1,8 +1,6 @@
-const moment = require( 'moment' );
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
-const { generateTransactionId } = require( '../../utils/helper' );
-const { where } = require( 'sequelize' );
+const { generateTransactionId, encryptData, decryptdata } = require( '../../utils/helper' );
 
 exports.createOrder = async ( req, res ) =>
 {
@@ -10,13 +8,11 @@ exports.createOrder = async ( req, res ) =>
     {
         const customerId = req.customerId;
 
-        const { restaurant_id, bill_amount, order_timing } = req.body;
+        const { restaurant_id, bill_amount, order_timing, coupon_id } = req.body;
         const [ orderStartTime, orderEndTime ] = order_timing.split( '-' );
 
         const start_time = orderStartTime;
         const end_time = orderEndTime;
-
-        const gst = 5;
 
         const customer = await db.customer.findOne( { where: { id: customerId } } );
         if ( !customer )
@@ -36,12 +32,6 @@ exports.createOrder = async ( req, res ) =>
 
         let discount_percentage = 0, discount_commision = 0, discount_from_restaurant = 0;
 
-        discounts.forEach( ( discount ) =>
-        {
-            discount.start_time = discount[ 'start_time ' ].trim();
-            delete discount[ 'start_time ' ];
-        } );
-
         const filteredDiscount = discounts.find( ( discount ) =>
         {
             const discountStartTime = discount.start_time;
@@ -52,17 +42,17 @@ exports.createOrder = async ( req, res ) =>
             );
         } );
 
-        const restaurantCoupon = await db.restaurant_coupons.findOne( {
-            include: [
-                { model: db.coupons, as: 'coupon' },
-            ],
-            where: { restaurant_id: restaurant.id }
-        } );
-
-        let coupon_discount;
-        if ( restaurantCoupon )
+        let coupon_discount = 0, convin_fee, gstDis;
+        if ( coupon_id )
         {
-            coupon_discount = restaurantCoupon.coupon.discount;
+            const coupons = await db.coupons.findOne( {
+                where: { id: coupon_id, status: "active" }
+            } );
+
+            if ( coupons )
+            {
+                coupon_discount = coupons.discount;
+            }
         }
 
         if ( filteredDiscount )
@@ -76,14 +66,23 @@ exports.createOrder = async ( req, res ) =>
             return getErrorResult( res, 500, 'Something went wrong.' );
         }
 
-        const discount_by_customer = bill_amount * discount_percentage / 100;
-        const profit = bill_amount * discount_commision / 100;
-        const gstRate = profit * gst / 100;
-        const magic_coupon_amount = bill_amount * coupon_discount / 100;
-        const gstAmt = bill_amount * gst / 100;
+        const convinenceFee = await db.configurations.findOne( { where: { type: 'convinence_fee' }, attributes: [ 'value' ] } );
+        const GST = await db.configurations.findOne( { where: { type: 'gst' }, attributes: [ 'value' ] } );
+        convin_fee = convinenceFee.value;
+        gstDis = GST.value;
 
-        const discountGiven = discount_by_customer + magic_coupon_amount;
-        const total_profit = profit - gstRate;
+        const convenienceRate = bill_amount * convin_fee / 100;
+        const dis_to_customer = ( bill_amount * discount_percentage / 100 );
+        const dis_by_res = bill_amount * discount_from_restaurant / 100;
+        const com_by_admin = ( bill_amount * discount_commision / 100 ) + convenienceRate;
+        const gstRate = com_by_admin * gstDis / 100;
+        const gstAmt = com_by_admin + gstRate;
+
+        const magic_coupon_amount = bill_amount * coupon_discount / 100;
+
+        const discountGiven = dis_to_customer + magic_coupon_amount;
+        const pay_by_customer = ( bill_amount - discountGiven ) + convenienceRate;
+        const givenToRes = pay_by_customer - com_by_admin - gstRate - magic_coupon_amount;
 
         const createOrder = await db.orders.create( {
             user_id: restaurant.user_id,
@@ -92,24 +91,26 @@ exports.createOrder = async ( req, res ) =>
             order_date: Date.now(),
             transaction_id: generateTransactionId(),
             bill_amount: bill_amount,
-            gst: gstAmt,
-            discount_to_customer: discount_percentage,
-            discount_given_by_customer: discount_by_customer,
-            order_timing: order_timing,
-            our_profit: total_profit,
-            magic_coupon_amount: magic_coupon_amount,
-            discount_from_restaurant: discount_from_restaurant,
-            discount_commision: discount_commision,
+            discount_from_restaurant: parseFloat( discount_from_restaurant ),
+            discount_to_customer: parseFloat( discount_percentage ),
+            discount_commision: parseFloat( discount_commision ),
             magic_coupon_discount: parseFloat( coupon_discount ),
+            convinence_fee: parseFloat( convin_fee ),
+            gst: parseFloat( gstDis ),
+            dis_to_customer: dis_to_customer,
+            amt_pay_by_customer: pay_by_customer,
+            dis_receive_by_res: dis_by_res,
+            commission_by_admin: com_by_admin,
+            magic_coupon_amount: magic_coupon_amount,
+            gst_rate: gstRate,
+            gst_amt: gstAmt,
+            given_to_res: givenToRes,
             discount_given: discountGiven,
+            order_timing: order_timing
         } );
 
-        const data = {
-            order: createOrder,
-        };
-
-        return getResult( res, 200, data, "order created successfully." );
-    } catch ( error ) 
+        return getResult( res, 200, createOrder, "order created successfully." );
+    } catch ( error )
     {
         console.error( "err in create order : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
@@ -118,19 +119,43 @@ exports.createOrder = async ( req, res ) =>
 
 exports.getAllOrders = async ( req, res ) =>
 {
-    const customerId = req.customerId;
-    await db.orders.findAll( {
-        where: { customer_id: customerId }
-    } )
-        .then( data =>
-        {
-            return getResult( res, 200, data, "fetch all orders successfully." );
-        } )
-        .catch( err =>
-        {
-            console.error( "err in fetch all orders : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+    try
+    {
+        const customerId = req.customerId;
+
+        let orderList = [];
+
+        const orders = await db.orders.findAll( {
+            include: [
+                {
+                    model: db.restaurants,
+                    attributes: [ "id", "store_name", "address" ],
+                    as: "restaurant",
+                    require: false
+                }
+            ],
+            where: { customer_id: customerId },
+            attributes: [ "id", "order_date", "discount_given", "bill_amount" ]
         } );
+
+        orders.forEach( order =>
+        {
+            const store = order.restaurant;
+
+            orderList.push( {
+                store_name: store ? store.store_name : '',
+                address: store ? store.address : '',
+                bill_amount: parseFloat( order.bill_amount ),
+                discount: parseFloat( order.discount_given ),
+                date: order.order_date,
+            } );
+        } );
+        return getResult( res, 200, orderList, "fetch all orders successfully." );
+    } catch ( err )
+    {
+        console.error( "err in fetch all orders : ", err );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
 };
 
 exports.deleteOrder = async ( req, res ) =>

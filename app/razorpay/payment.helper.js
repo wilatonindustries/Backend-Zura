@@ -10,15 +10,16 @@ exports.paymentIntent = async ( amount ) =>
 {
     try
     {
-        const options = {
+        const paymentIntent = await rzp.orders.create( {
             amount: amount * 100,
             currency: config.razorpay.currency,
-        };
-        const paymentIntent = await rzp.orders.create( options );
+            payment_capture: true
+        } );
+
         return paymentIntent;
     } catch ( error )
     {
         console.error( 'Error creating payment intent:', error );
         throw error;
     }
-}
+};

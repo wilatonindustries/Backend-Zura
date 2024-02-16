@@ -5,39 +5,46 @@ exports.defaultDiscount = () =>
 {
     const defaultValue = [
         {
-            "start_time ": "07:00AM",
+            "start_time": "07:00AM",
             "end_time": "10:00AM",
-            "discount": 0,
-            "discount_percentage": 0,
-            "discount_commission": 0
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
         },
         {
-            "start_time ": "10:00AM",
+            "start_time": "10:00AM",
             "end_time": "12:00PM",
-            "discount": 0,
-            "discount_percentage": 0,
-            "discount_commission": 0
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
         },
         {
-            "start_time ": "12:00PM",
+            "start_time": "12:00PM",
             "end_time": "03:00PM",
-            "discount": 0,
-            "discount_percentage": 0,
-            "discount_commission": 0
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
         },
         {
-            "start_time ": "03:00PM",
+            "start_time": "03:00PM",
             "end_time": "07:00PM",
-            "discount": 0,
-            "discount_percentage": 0,
-            "discount_commission": 0
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
         },
         {
-            "start_time ": "07:00PM",
+            "start_time": "07:00PM",
+            "end_time": "10:00PM",
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
+        },
+        {
+            "start_time": "10:00PM",
             "end_time": "12:00AM",
-            "discount": 0,
-            "discount_percentage": 0,
-            "discount_commission": 0
+            "discount": "0",
+            "discount_percentage": "0",
+            "discount_commission": "0"
         }
     ];
 

@@ -28,7 +28,9 @@ exports.totalDiscountReceivedWithFilter = async ( req, res ) =>
                         attributes: [ "id" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     }
@@ -36,7 +38,11 @@ exports.totalDiscountReceivedWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( 'COALESCE(SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100), 0)' ),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.dis_receive_by_res' ) ),
+                            0
+                        ),
                         'discount_received'
                     ]
                 ],
@@ -55,7 +61,11 @@ exports.totalDiscountReceivedWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( 'COALESCE(SUM(CAST(orders.bill_amount AS DECIMAL)) * (SUM(CAST(orders.discount_from_restaurant AS DECIMAL)) / 100), 0)' ),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.dis_receive_by_res' ) ),
+                            0
+                        ),
                         'discount_received'
                     ]
                 ],
@@ -97,49 +107,21 @@ exports.totalDiscountReceivedWithFilter = async ( req, res ) =>
     }
 };
 
-async function totalSales ()
-{
-    const total_sales = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
-                    0
-                ),
-                'total_sales'
-            ]
-        ],
-    } );
-    return total_sales;
-}
-
-async function totalDiscount ()
-{
-    const total_discount_from_restaurant = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'discount_from_restaurant' ) ),
-                    0
-                ),
-                'discount_from_restaurant'
-            ]
-        ],
-    } );
-    return total_discount_from_restaurant;
-}
-
 async function discountReceived ()
 {
-    const total_sales_result = await totalSales();
-    const discount_from_restaurant_result = await totalDiscount();
+    const result = await db.orders.findAll( {
+        attributes: [
+            [
+                Sequelize.fn(
+                    'COALESCE',
+                    Sequelize.fn( 'SUM', Sequelize.col( 'dis_receive_by_res' ) ),
+                    0
+                ),
+                'total_discount_received'
+            ]
+        ],
+    } );
 
-    const total_sales = parseFloat( total_sales_result[ 0 ].dataValues.total_sales );
-    const discount_from_restaurant = parseFloat( discount_from_restaurant_result[ 0 ].dataValues.discount_from_restaurant );
-
-    const total_discount_received = total_sales * discount_from_restaurant / 100;
-
+    const total_discount_received = parseFloat( result[ 0 ].dataValues.total_discount_received );
     return total_discount_received;
 }

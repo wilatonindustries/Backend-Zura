@@ -22,7 +22,9 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     },
@@ -31,7 +33,9 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -68,7 +72,9 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     }
@@ -111,7 +117,9 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -225,7 +233,9 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     },
@@ -234,7 +244,9 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -245,21 +257,21 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "is_paid" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst_rate", "commission_by_admin", "is_paid", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
+                    order_id: order.id,
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst_rate ),
+                    total_commision: parseFloat( order.commission_by_admin ),
+                    store_share_given: parseFloat( order.given_to_res ),
                     paid_or_not: order.is_paid
                 } );
             } );
@@ -272,7 +284,9 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     }
@@ -283,21 +297,21 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "is_paid" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst_rate", "commission_by_admin", "is_paid", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
+                    order_id: order.id,
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst_rate ),
+                    total_commision: parseFloat( order.commission_by_admin ),
+                    store_share_given: parseFloat( order.given_to_res ),
                     paid_or_not: order.is_paid
                 } );
             } );
@@ -316,7 +330,9 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         attributes: [ "id", "name" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         require: false
                     }
@@ -327,21 +343,21 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "is_paid" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst_rate", "commission_by_admin", "is_paid", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
+                    order_id: order.id,
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst_rate ),
+                    total_commision: parseFloat( order.commission_by_admin ),
+                    store_share_given: parseFloat( order.given_to_res ),
                     paid_or_not: order.is_paid
                 } );
             } );
@@ -368,21 +384,21 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "is_paid" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst_rate", "commission_by_admin", "is_paid", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
+                    order_id: order.id,
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst_rate ),
+                    total_commision: parseFloat( order.commission_by_admin ),
+                    store_share_given: parseFloat( order.given_to_res ),
                     paid_or_not: order.is_paid
                 } );
             } );
@@ -413,125 +429,72 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
     }
 };
 
+exports.paidOrUnpaid = async ( req, res ) =>
+{
+    try
+    {
+        const id = req.params.id;
+        const { is_paid } = req.body;
+
+        const order = await db.orders.findOne( { where: { id: id } } );
+
+        if ( !order )
+        {
+            return getErrorResult( res, 400, `order not found with id ${ id }.` );
+        }
+
+        if ( is_paid === true )
+        {
+            await db.orders.update( { is_paid }, { where: { id } } );
+            return getResult( res, 200, 1, "pay successfully." );
+        } else
+        {
+            await db.orders.update( { is_paid }, { where: { id } } );
+            return getResult( res, 200, 1, "unpay successfully." );
+        }
+    } catch ( err )
+    {
+        console.error( "err in pay : ", err );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
+};
+
 async function paidPayout ()
 {
-    const total_earnings = await totalEarnings();
-    const gst = await totalGST();
-    const result = await db.orders.findAll( {
+    const result = await db.restaurants_payouts.findAll( {
         attributes: [
             [
                 Sequelize.fn(
                     'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
+                    Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
                     0
                 ),
                 'paid_payout'
-            ]
+            ],
         ],
-        where: {
-            is_paid: true
-        }
     } );
 
-    const paid = parseFloat( result[ 0 ].dataValues.paid_payout );
+    const paidPayout = parseFloat( result[ 0 ].dataValues.paid_payout );
 
-    const payout = paid - total_earnings - gst;
-    return payout;
+    return paidPayout;
 }
 
 async function toBePaidPayout ()
 {
-    const total_earnings = await totalEarnings();
-    const gst = await totalGST();
-    const result = await db.orders.findAll( {
+    const result = await db.payout_histories.findAll( {
         attributes: [
             [
                 Sequelize.fn(
                     'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
+                    Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
                     0
                 ),
                 'to_be_paid_payout'
-            ]
-        ],
-        where: {
-            is_paid: false
-        }
-    } );
-    const toBePaid = parseFloat( result[ 0 ].dataValues.to_be_paid_payout );
-
-    const toBepayout = toBePaid - total_earnings - gst;
-    return toBepayout;
-}
-
-async function totalGST ()
-{
-    const gst = 5;
-    const total_earnings = await totalEarnings();
-
-    const total_gst = total_earnings * gst / 100;
-
-    return total_gst;
-}
-
-async function totalEarnings ()
-{
-    const conenience_fee = 10;
-    const totalDiscountReceived = await discountReceived();
-    const total_dis_given = await totalDiscountGiven();
-
-    const earnings = totalDiscountReceived + conenience_fee;
-
-    const givenDisPr = earnings * total_dis_given / 100;
-
-    const result = earnings - givenDisPr;
-
-    return result;
-}
-
-async function discountReceived ()
-{
-    const result = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
-                    0
-                ),
-                'total_sales'
             ],
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'discount_from_restaurant' ) ),
-                    0
-                ),
-                'discount_from_restaurant'
-            ]
         ],
     } );
 
-    const total_sales_res = parseFloat( result[ 0 ].dataValues.total_sales );
-    const discount_from_restaurant_res = parseFloat( result[ 0 ].dataValues.discount_from_restaurant );
+    const paidPayout = parseFloat( result[ 0 ].dataValues.to_be_paid_payout );
 
-    const total_discount_received = total_sales_res * discount_from_restaurant_res / 100;
-
-    return total_discount_received;
-}
-
-async function totalDiscountGiven ()
-{
-    const result = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.literal( 'COALESCE(SUM(CAST(orders.discount_to_customer AS DECIMAL)) + (SUM(CAST(orders.magic_coupon_discount AS DECIMAL))), 0)' ),
-                'total_discount_given'
-            ]
-        ],
-    } );
-
-    const total_discount_given = parseFloat( result[ 0 ].dataValues.total_discount_given );
-
-    return total_discount_given;
+    return paidPayout;
 }

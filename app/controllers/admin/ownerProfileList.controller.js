@@ -1,6 +1,7 @@
 const { getResult, getErrorResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
+const Op = db.Op;
 
 exports.getOwnerProfileListWithFilter = async ( req, res ) =>
 {
@@ -21,12 +22,18 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                     {
                         model: db.restaurants,
                         as: "restaurant",
-                        where: { store_name: store_name },
+                        where: {
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
+                        },
                         attributes: [ 'id', 'store_name' ]
                     }
                 ],
                 where: {
-                    owner_name: owner_name,
+                    owner_name: {
+                        [ Op.like ]: `%${ owner_name }%`
+                    },
                     is_accept: true,
                     is_active: true,
                     createdAt: {
@@ -40,7 +47,8 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                 const restaurant = owner.restaurant;
                 ownerProfileList.push( {
                     owner_id: owner.id,
-                    store_name: restaurant.store_name,
+                    store_id: restaurant ? restaurant.id : null,
+                    store_name: restaurant ? restaurant.store_name : '',
                     owner_name: owner.owner_name,
                     owner_mobile: owner.owner_mobile,
                     is_accept: owner.is_accept
@@ -57,7 +65,9 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                     }
                 ],
                 where: {
-                    owner_name: owner_name,
+                    owner_name: {
+                        [ Op.like ]: `%${ owner_name }%`
+                    },
                     is_accept: true,
                     is_active: true,
                     createdAt: {
@@ -71,6 +81,7 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                 const restaurant = owner.restaurant;
                 ownerProfileList.push( {
                     owner_id: owner.id,
+                    store_id: restaurant ? restaurant.id : null,
                     store_name: restaurant ? restaurant.store_name : '',
                     owner_name: owner.owner_name,
                     owner_mobile: owner.owner_mobile,
@@ -94,7 +105,11 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                         attributes: [ 'id', 'owner_name', 'owner_mobile', 'is_accept' ]
                     }
                 ],
-                where: { store_name: store_name },
+                where: {
+                    store_name: {
+                        [ Op.like ]: `%${ store_name }%`
+                    }
+                },
                 attributes: [ 'id', 'store_name' ],
             } );
             restaurants.forEach( ( restaurant ) =>
@@ -102,6 +117,7 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                 const owner = restaurant.user;
                 ownerProfileList.push( {
                     owner_id: owner.id,
+                    store_id: restaurant ? restaurant.id : null,
                     store_name: restaurant ? restaurant.store_name : '',
                     owner_name: owner.owner_name,
                     owner_mobile: owner.owner_mobile,
@@ -122,7 +138,7 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                     is_accept: true,
                     is_active: true,
                     createdAt: {
-                        [ db.Op.between ]: [ startDate, endDate ]
+                        [ Op.between ]: [ startDate, endDate ]
                     }
                 },
                 attributes: [ 'id', 'owner_name', 'owner_mobile', 'is_accept' ]
@@ -132,6 +148,7 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
                 const restaurant = owner.restaurant;
                 ownerProfileList.push( {
                     owner_id: owner.id,
+                    store_id: restaurant ? restaurant.id : null,
                     store_name: restaurant ? restaurant.store_name : '',
                     owner_name: owner.owner_name,
                     owner_mobile: owner.owner_mobile,
@@ -150,9 +167,6 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
             ],
             where: {
                 is_accept: false,
-                createdAt: {
-                    [ db.Op.between ]: [ startDate, endDate ]
-                }
             },
             attributes: [ 'id', 'owner_name', 'owner_mobile', 'is_accept' ]
         } );
@@ -161,6 +175,7 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
             const restaurant = owner.restaurant;
             ownerRequestList.push( {
                 owner_id: owner.id,
+                store_id: restaurant ? restaurant.id : null,
                 store_name: restaurant ? restaurant.store_name : '',
                 owner_name: owner.owner_name,
                 owner_mobile: owner.owner_mobile,

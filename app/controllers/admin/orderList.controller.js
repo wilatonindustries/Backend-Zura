@@ -1,6 +1,7 @@
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
+const Op = db.Op;
 
 exports.orderList = async ( req, res ) =>
 {
@@ -9,106 +10,206 @@ exports.orderList = async ( req, res ) =>
         const { store_name, customer_name, filter } = req.body;
         const [ startDate, endDate ] = getDataForFilter( filter );
 
-        let orderlist = [];
-        let ordersPromises;
-        let formattedOrders;
+        let orderlist = [], orders;
         const totalOrders = await db.orders.count();
-        if ( customer_name )
+
+        if ( store_name && customer_name )
         {
-            const customers = await db.customer.findAll( {
-                where: { name: customer_name },
-            } );
-            ordersPromises = customers.map( async ( customer ) =>
-            {
-                const orders = await db.orders.findAll( {
-                    where: {
-                        [ db.Op.or ]: [
-                            { customer_id: customer.id }
-                        ],
-                        createdAt: {
-                            [ db.Op.between ]: [ startDate, endDate ]
-                        }
+            orders = await db.orders.findAll( {
+                include: [
+                    {
+                        model: db.restaurants,
+                        attributes: [ "id", "store_name" ],
+                        as: "restaurant",
+                        where: {
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
+                        },
+                        require: false
                     },
-                    attributes: [ 'restaurant_id', 'createdAt', 'transaction_id', 'bill_amount', 'gst', 'discount_to_customer', 'discount_given_by_customer', 'order_timing', 'our_profit' ]
+                    {
+                        model: db.customer,
+                        attributes: [ "id", "name" ],
+                        as: "customer",
+                        where: {
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
+                        },
+                        require: false
+                    }
+                ],
+                where: {
+                    createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                },
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+            } );
+
+            orders.forEach( order =>
+            {
+                const store = order.restaurant;
+                const customer = order.customer;
+
+                orderlist.push( {
+                    store_name: store ? store.store_name : '',
+                    customer_name: customer ? customer.name : '',
+                    date: order.order_date,
+                    transaction_id: order.transaction_id,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    gst: parseFloat( order.gst_rate ),
+                    discount_to_customer: parseFloat( order.discount_to_customer ),
+                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    order_timing: order.order_timing,
+                    our_profit: parseFloat( order.gst_amt )
                 } );
+            } );
+        } else if ( customer_name )
+        {
+            orders = await db.orders.findAll( {
+                include: [
+                    {
+                        model: db.restaurants,
+                        attributes: [ "id", "store_name" ],
+                        as: "restaurant",
+                        require: false
+                    },
+                    {
+                        model: db.customer,
+                        attributes: [ "id", "name" ],
+                        as: "customer",
+                        where: {
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
+                        },
+                        require: false
+                    }
+                ],
+                where: {
+                    createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                },
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+            } );
 
-                formattedOrders = await Promise.all( orders.map( async order =>
-                {
-                    const restaurants = await db.restaurants.findAll( {
-                        where: { id: order.restaurant_id },
-                        attributes: [ 'store_name' ]
-                    } );
+            orders.forEach( order =>
+            {
+                const store = order.restaurant;
+                const customer = order.customer;
 
-                    return {
-                        store_name: restaurants[ 0 ].store_name,
-                        customer_name: customer.name,
-                        date: order.createdAt,
-                        transaction_id: order.transaction_id,
-                        bill_amount: order.bill_amount,
-                        gst: order.gst,
-                        discount_to_customer: order.discount_to_customer,
-                        discount_given_by_customer: order.discount_given_by_customer,
-                        order_timing: order.order_timing,
-                        our_profit: order.our_profit
-                    };
-                } ) );
+                orderlist.push( {
+                    store_name: store ? store.store_name : '',
+                    customer_name: customer ? customer.name : '',
+                    date: order.order_date,
+                    transaction_id: order.transaction_id,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    gst: parseFloat( order.gst_rate ),
+                    discount_to_customer: parseFloat( order.discount_to_customer ),
+                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    order_timing: order.order_timing,
+                    our_profit: parseFloat( order.gst_amt )
+                } );
+            } );
+        } else if ( store_name )
+        {
+            orders = await db.orders.findAll( {
+                include: [
+                    {
+                        model: db.restaurants,
+                        attributes: [ "id", "store_name" ],
+                        as: "restaurant",
+                        where: {
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
+                        },
+                        require: false
+                    },
+                    {
+                        model: db.customer,
+                        attributes: [ "id", "name" ],
+                        as: "customer",
+                        require: false
+                    }
+                ],
+                where: {
+                    createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                },
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+            } );
 
-                orderlist.push( ...formattedOrders );
-                return formattedOrders;
+            orders.forEach( order =>
+            {
+                const store = order.restaurant;
+                const customer = order.customer;
+
+                orderlist.push( {
+                    store_name: store ? store.store_name : '',
+                    customer_name: customer ? customer.name : '',
+                    date: order.order_date,
+                    transaction_id: order.transaction_id,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    gst: parseFloat( order.gst_rate ),
+                    discount_to_customer: parseFloat( order.discount_to_customer ),
+                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    order_timing: order.order_timing,
+                    our_profit: parseFloat( order.gst_amt )
+                } );
             } );
         } else
         {
-            const restaurants = await db.restaurants.findAll( {
-                where: { store_name: store_name }
+            orders = await db.orders.findAll( {
+                include: [
+                    {
+                        model: db.restaurants,
+                        attributes: [ "id", "store_name" ],
+                        as: "restaurant",
+                        require: false
+                    },
+                    {
+                        model: db.customer,
+                        attributes: [ "id", "name" ],
+                        as: "customer",
+                        require: false
+                    }
+                ],
+                where: {
+                    createdAt: {
+                        [ Op.between ]: [ startDate, endDate ]
+                    }
+                },
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
             } );
 
-            ordersPromises = restaurants.map( async ( restaurant ) =>
+            orders.forEach( order =>
             {
-                const orders = await db.orders.findAll( {
-                    where: {
-                        [ db.Op.or ]: [
-                            { restaurant_id: restaurant.id },
-                        ],
-                        createdAt: {
-                            [ db.Op.between ]: [ startDate, endDate ]
-                        }
-                    },
-                    attributes: [ 'customer_id', 'createdAt', 'transaction_id', 'bill_amount', 'gst', 'discount_to_customer', 'discount_given_by_customer', 'order_timing', 'our_profit' ]
+                const store = order.restaurant;
+                const customer = order.customer;
+
+                orderlist.push( {
+                    store_name: store ? store.store_name : '',
+                    customer_name: customer ? customer.name : '',
+                    date: order.order_date,
+                    transaction_id: order.transaction_id,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    gst: parseFloat( order.gst_rate ),
+                    discount_to_customer: parseFloat( order.discount_to_customer ),
+                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    order_timing: order.order_timing,
+                    our_profit: parseFloat( order.gst_amt )
                 } );
-
-                formattedOrders = await Promise.all( orders.map( async order =>
-                {
-                    const customer = await db.customer_details.findAll( {
-                        where: { id: order.customer_id },
-                        attributes: [ 'name' ]
-                    } );
-
-                    return {
-                        store_name: restaurant.store_name,
-                        customer_name: customer[ 0 ].name,
-                        date: order.createdAt,
-                        transaction_id: order.transaction_id,
-                        bill_amount: order.bill_amount,
-                        gst: order.gst,
-                        discount_to_customer: order.discount_to_customer,
-                        discount_given_by_customer: order.discount_given_by_customer,
-                        order_timing: order.order_timing,
-                        our_profit: order.our_profit
-                    };
-                } ) );
-
-                orderlist.push( ...formattedOrders );
-                return formattedOrders;
             } );
         }
 
-        const ordersData = await Promise.all( ordersPromises );
-
-        const flatOrders = ordersData.flat();
-
         const data = {
             total_orders: totalOrders,
-            orders: flatOrders
+            orders_list: orderlist
         };
 
         return getResult( res, 200, data, "order list  fetched successfully." );

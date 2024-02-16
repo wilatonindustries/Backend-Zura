@@ -238,7 +238,7 @@ exports.updateProfile = async ( req, res ) =>
                 },
                     {
                         where: {
-                            id: customerId
+                            customer_id: customerId
                         }
                     } );
                 let updateCustomer = await db.customer.update( {
@@ -268,7 +268,7 @@ exports.updateProfile = async ( req, res ) =>
                 },
                     {
                         where: {
-                            id: customerId
+                            customer_id: customerId
                         }
                     } );
                 let updateCustomer = await db.customer.update( {

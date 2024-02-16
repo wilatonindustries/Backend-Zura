@@ -1,7 +1,7 @@
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
-const { assignCoupon } = require( "../restaurant/coupon.controller" );
+const Op = db.Op;
 
 exports.restaurantList = async ( req, res ) =>
 {
@@ -15,7 +15,15 @@ exports.restaurantList = async ( req, res ) =>
         {
             restaurants = await db.restaurants.findAll( {
                 where: {
-                    [ db.Op.or ]: [ { store_name: name }, { address: name } ],
+                    [ db.Op.or ]: [ {
+                        store_name: {
+                            [ Op.like ]: `%${ name }%`
+                        }
+                    }, {
+                        address: {
+                            [ Op.like ]: `%${ name }%`
+                        }
+                    } ],
                 },
                 attributes: [ 'id', 'store_name', 'address', 'short_address' ],
                 include: [ {
@@ -29,7 +37,7 @@ exports.restaurantList = async ( req, res ) =>
             restaurants = await db.restaurants.findAll( {
                 where: {
                     createdAt: {
-                        [ db.Op.between ]: [ startDate, endDate ]
+                        [ Op.between ]: [ startDate, endDate ]
                     }
                 },
                 attributes: [ 'id', 'store_name', 'address', 'short_address' ],
@@ -54,12 +62,19 @@ exports.restaurantList = async ( req, res ) =>
         {
             const discounts = JSON.parse( restaurant.discounts.discount_json );
 
+            const formattedDiscounts = discounts.map( discount => ( {
+                ...discount,
+                discount: parseInt( discount.discount ),
+                discount_percentage: parseInt( discount.discount_percentage ),
+                discount_commission: parseInt( discount.discount_commission )
+            } ) );
+
             return {
                 id: restaurant.id,
                 store_name: restaurant.store_name,
                 address: restaurant.address,
                 short_address: restaurant.short_address,
-                discounts: discounts,
+                discounts: formattedDiscounts,
             };
         } );
 
@@ -97,19 +112,6 @@ exports.getRestaurantDetailsById = async ( req, res ) =>
         if ( discounts && discounts.discount_json )
         {
             discounts.discount_json = JSON.parse( discounts.discount_json );
-        }
-
-        const coupons = await db.restaurant_coupons.findAll( {
-            where: { restaurant_id: id },
-            required: false,
-            include: [
-                { model: db.coupons, as: 'coupon' },
-            ]
-        } );
-
-        if ( coupons.length > 0 )
-        {
-            restaurant.setDataValue( 'magic_coupon', coupons.map( coupon => coupon.coupon ) );
         }
 
         const data = {

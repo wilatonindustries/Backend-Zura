@@ -28,7 +28,9 @@ exports.totalSalesWithFilter = async ( req, res ) =>
                         attributes: [ "id" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         required: false
                     },
@@ -37,7 +39,9 @@ exports.totalSalesWithFilter = async ( req, res ) =>
                         attributes: [ "id" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         required: false
                     }
@@ -71,7 +75,9 @@ exports.totalSalesWithFilter = async ( req, res ) =>
                         attributes: [ "id" ],
                         as: "restaurant",
                         where: {
-                            store_name
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
                         },
                         require: false
                     }
@@ -105,7 +111,9 @@ exports.totalSalesWithFilter = async ( req, res ) =>
                         attributes: [ "id" ],
                         as: "customer",
                         where: {
-                            name: customer_name
+                            name: {
+                                [ Op.like ]: `%${ customer_name }%`
+                            }
                         },
                         required: false
                     }

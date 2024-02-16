@@ -2,6 +2,7 @@ const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
 const { defaultDiscount } = require( "./restaurantDiscounts.controller" );
+const Op = db.Op;
 
 exports.createRestaurant = async ( req, res ) =>
 {
@@ -9,92 +10,89 @@ exports.createRestaurant = async ( req, res ) =>
     {
         const { owner_name, owner_mobile, restaurantData, bankAccountDetails, discountData } = req.body;
 
-        if ( owner_mobile.length === 10 )
-        {
-            const mobileExistOrNot = await db.user.findOne( { where: { owner_mobile } } );
-            if ( mobileExistOrNot )
-            {
-                return getErrorResult( res, 403, 'owner already exists .' );
-            }
-
-            const owner = await db.user.create( { owner_name, owner_mobile, is_accept: true } );
-
-            const category = await db.categories.findAll();
-            if ( category.length === 0 )
-            {
-                return getErrorResult( res, 404, 'category not found.' );
-            } else
-            {
-                if ( bankAccountDetails )
-                {
-                    if ( bankAccountDetails.account_number )
-                    {
-                        const existingBankDetails = await db.restaurant_bank_account_details.findOne( {
-                            where: {
-                                account_number: bankAccountDetails.account_number
-                            }
-                        } );
-                        if ( existingBankDetails )
-                        {
-                            return getErrorResult( res, 403, 'Bank account number already exists.' );
-                        }
-                    }
-                }
-                const createdRestaurant = await db.restaurants.create( {
-                    user_id: owner.id,
-                    ...restaurantData
-                } );
-
-                const createdBankDetails = await db.restaurant_bank_account_details.create( {
-                    user_id: owner.id,
-                    restaurant_id: createdRestaurant.id,
-                    ...( bankAccountDetails ? { bankAccountDetails } : {} ),
-                } );
-
-                const createDoc = await db.restaurant_documents.create( {
-                    user_id: owner.id,
-                    restaurant_id: createdRestaurant.id,
-                } );
-
-                const createProfile = await db.restaurant_profile_photos.create( {
-                    user_id: owner.id,
-                    restaurant_id: createdRestaurant.id,
-                } );
-
-                let createDiscount;
-                if ( discountData )
-                {
-                    createDiscount = await db.restaurant_discounts.create( {
-                        user_id: owner.id,
-                        restaurant_id: createdRestaurant.id,
-                        discount_json: JSON.stringify( discountData ),
-                    } );
-                } else
-                {
-                    discount = defaultDiscount();
-                    createDiscount = await db.restaurant_discounts.create( {
-                        user_id: owner.id,
-                        restaurant_id: createdRestaurant.id,
-                        discount_json: JSON.stringify( discount ),
-                    } );
-                }
-
-                const data = {
-                    owner: owner,
-                    restaurant: createdRestaurant,
-                    bank_details: createdBankDetails,
-                    discount: createDiscount,
-                    document: createDoc,
-                    profile_photos: createProfile
-                };
-
-                return getResult( res, 200, data, "restaurant created successfully." );
-            }
-
-        } else
+        if ( owner_mobile.length !== 10 )
         {
             return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
         }
+        const mobileExistOrNot = await db.user.findOne( { where: { owner_mobile } } );
+        if ( mobileExistOrNot )
+        {
+            return getErrorResult( res, 403, 'owner already exists .' );
+        }
+
+        const owner = await db.user.create( { owner_name, owner_mobile, is_accept: true } );
+
+        const category = await db.categories.findAll();
+        if ( category.length === 0 )
+        {
+            return getErrorResult( res, 404, 'category not found.' );
+        }
+
+        const createdRestaurant = await db.restaurants.create( {
+            user_id: owner.id,
+            ...restaurantData
+        } );
+
+        if ( bankAccountDetails )
+        {
+            if ( bankAccountDetails.account_number )
+            {
+                const existingBankDetails = await db.restaurant_bank_account_details.findOne( {
+                    where: {
+                        account_number: bankAccountDetails.account_number
+                    }
+                } );
+                if ( existingBankDetails )
+                {
+                    return getErrorResult( res, 403, 'Bank account number already exists.' );
+                }
+            }
+        }
+
+        const createdBankDetails = await db.restaurant_bank_account_details.create( {
+            user_id: owner.id,
+            restaurant_id: createdRestaurant.id,
+            ...( bankAccountDetails ? { bankAccountDetails } : {} ),
+        } );
+
+        const createDoc = await db.restaurant_documents.create( {
+            user_id: owner.id,
+            restaurant_id: createdRestaurant.id,
+        } );
+
+        const createProfile = await db.restaurant_profile_photos.create( {
+            user_id: owner.id,
+            restaurant_id: createdRestaurant.id,
+        } );
+
+        let createDiscount;
+        if ( discountData )
+        {
+            createDiscount = await db.restaurant_discounts.create( {
+                user_id: owner.id,
+                restaurant_id: createdRestaurant.id,
+                discount_json: JSON.stringify( discountData ),
+            } );
+        } else
+        {
+            discount = defaultDiscount();
+            createDiscount = await db.restaurant_discounts.create( {
+                user_id: owner.id,
+                restaurant_id: createdRestaurant.id,
+                discount_json: JSON.stringify( discount ),
+            } );
+        }
+
+        const data = {
+            owner: owner,
+            restaurant: createdRestaurant,
+            bank_details: createdBankDetails,
+            discount: createDiscount,
+            document: createDoc,
+            profile_photos: createProfile
+        };
+
+        return getResult( res, 200, data, "restaurant created successfully." );
     } catch ( error )
     {
         console.error( "error in creating restaurant : ", error );
@@ -125,7 +123,9 @@ exports.restaurantList = async ( req, res ) =>
         if ( store_name )
         {
             orderOptions.where = {
-                store_name
+                store_name: {
+                    [ Op.like ]: `%${ store_name }%`
+                }
             };
             restaurants = await db.restaurants.findAll( orderOptions );
             restaurants.forEach( ( store ) =>
@@ -142,7 +142,7 @@ exports.restaurantList = async ( req, res ) =>
             const [ startDate, endDate ] = getDataForFilter( filter );
             orderOptions.where = {
                 createdAt: {
-                    [ db.Op.between ]: [ startDate, endDate ]
+                    [ Op.between ]: [ startDate, endDate ]
                 }
             };
             restaurants = await db.restaurants.findAll( orderOptions );
@@ -321,20 +321,68 @@ exports.updateRestaurant = async ( req, res ) =>
     }
 };
 
-exports.updateOwner = async ( req, res ) =>
+exports.updateOwnerOrStore = async ( req, res ) =>
 {
     try
     {
-        const { owner_name, owner_mobile, user_id } = req.body;
+        const { owner_name, owner_mobile, store_name, user_id, restaurant_id } = req.body;
 
-        const userAuth = await db.user.findOne( { where: { id: user_id } } );
-        if ( userAuth )
+        if ( owner_name || owner_mobile )
         {
-            if ( userAuth.email === null )
+            const userAuth = await db.user.findOne( { where: { id: user_id } } );
+            if ( !userAuth )
             {
-                let updateUser = await db.user.update( {
+                return getErrorResult( res, 404, `user not found with id ${ user_id }` );
+            }
+            if ( owner_mobile && owner_name )
+            {
+                if ( owner_mobile.length === 10 )
+                {
+                    const updateUser = await db.user.update( {
+                        owner_name: owner_name,
+                        owner_mobile: owner_mobile,
+                        is_profile_updated: true
+                    },
+                        {
+                            where: {
+                                id: user_id
+                            }
+                        } );
+                    if ( !updateUser )
+                    {
+                        return getErrorResult( res, 500, 'somthing went wrong.' );
+                    }
+                    return getResult( res, 200, 1, "owner updated successfully." );
+                } else
+                {
+                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+                }
+            } else if ( owner_mobile )
+            {
+                if ( owner_mobile.length === 10 )
+                {
+                    const updateUser = await db.user.update( {
+                        owner_mobile: owner_mobile,
+                        is_profile_updated: true
+                    },
+                        {
+                            where: {
+                                id: user_id
+                            }
+                        } );
+                    if ( !updateUser )
+                    {
+                        return getErrorResult( res, 500, 'somthing went wrong.' );
+                    }
+                    return getResult( res, 200, 1, "owner updated successfully." );
+                } else
+                {
+                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+                }
+            } else if ( owner_name )
+            {
+                const updateUser = await db.user.update( {
                     owner_name: owner_name,
-                    owner_mobile: owner_mobile,
                     is_profile_updated: true
                 },
                     {
@@ -346,28 +394,27 @@ exports.updateOwner = async ( req, res ) =>
                 {
                     return getErrorResult( res, 500, 'somthing went wrong.' );
                 }
-            } else
-            {
-                let updateUser = await db.user.update( {
-                    owner_name: owner_name,
-                    owner_mobile: owner_mobile,
-                    is_profile_updated: true,
-                },
-                    {
-                        where: {
-                            id: user_id
-                        }
-                    } );
-                if ( !updateUser )
-                {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
-                }
+                return getResult( res, 200, 1, "owner updated successfully." );
             }
+        } else if ( store_name )
+        {
+            const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+            if ( !restaurant )
+            {
+                return getErrorResult( res, 404, `restaurant not found with id ${ restaurant_id }` );
+            }
+            await db.restaurants.update( {
+                store_name: store_name
+            }, {
+                where: {
+                    id: restaurant_id,
+                }
+            } );
+            return getResult( res, 200, 1, "restaurant updated successfully." );
         }
-        return getResult( res, 200, 1, "owner updated successfully." );
     } catch ( error )
     {
-        console.error( "error in update owner : ", error );
+        console.error( "error in update owner or owner : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     };
 };

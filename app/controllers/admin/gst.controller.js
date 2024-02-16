@@ -21,7 +21,11 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
-                        where: { store_name },
+                        where: {
+                            store_name: {
+                                [ Op.like ]: `%${ store_name }%`
+                            }
+                        },
                         require: false
                     }
                 ],
@@ -35,28 +39,38 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                     [
                         Sequelize.fn(
                             'COALESCE',
-                            Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
                             0
                         ),
                         'bill_amount'
+                    ],
+                    [
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.gst_rate' ) ),
+                            0
+                        ),
+                        'gst_rate'
                     ],
                 ],
                 as: 'orders',
                 group: [ 'restaurant.store_name' ],
             } );
 
+            const GST = await db.configurations.findOne( { where: { type: 'gst' }, attributes: [ 'value' ] } );
+
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
                 const billAmt = parseFloat( order.dataValues.bill_amount );
-                const gstAmount = billAmt * gst / 100;
+                const gstAmt = parseFloat( order.dataValues.gst_rate );
 
                 gstList.push( {
                     store_name: store ? store.store_name : '',
                     bill_amount: billAmt,
-                    gst: gst,
-                    gst_amount: gstAmount
+                    gst: parseFloat( GST.value ),
+                    gst_amount: gstAmt
                 } );
             } );
         } else
@@ -80,28 +94,38 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                     [
                         Sequelize.fn(
                             'COALESCE',
-                            Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.bill_amount' ) ),
                             0
                         ),
                         'bill_amount'
+                    ],
+                    [
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.gst_rate' ) ),
+                            0
+                        ),
+                        'gst_rate'
                     ],
                 ],
                 as: 'orders',
                 group: [ 'restaurant.store_name' ],
             } );
 
+            const GST = await db.configurations.findOne( { where: { type: 'gst' }, attributes: [ 'value' ] } );
+
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
                 const billAmt = parseFloat( order.dataValues.bill_amount );
-                const gstAmount = billAmt * gst / 100;
+                const gstAmt = parseFloat( order.dataValues.gst_rate );
 
                 gstList.push( {
                     store_name: store ? store.store_name : '',
                     bill_amount: billAmt,
-                    gst: gst,
-                    gst_amount: gstAmount
+                    gst: parseFloat( GST.value ),
+                    gst_amount: gstAmt
                 } );
             } );
         }
@@ -119,72 +143,20 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
 
 async function totalGST ()
 {
-    const gst = 5;
-    const total_earnings = await totalEarnings();
+    const result = await db.orders.findAll( {
+        attributes: [
+            [
+                Sequelize.fn(
+                    'COALESCE',
+                    Sequelize.fn( 'SUM', Sequelize.col( 'gst_amt' ) ),
+                    0
+                ),
+                'total_gst'
+            ],
+        ],
+    } );
 
-    const total_gst = total_earnings * gst / 100;
+    const total_gst = parseFloat( result[ 0 ].dataValues.total_gst );
 
     return total_gst;
-}
-
-async function totalEarnings ()
-{
-    const conenience_fee = 10;
-    const totalDiscountReceived = await discountReceived();
-    const total_dis_given = await totalDiscountGiven();
-
-    const earnings = totalDiscountReceived + conenience_fee;
-
-    const givenDisPr = earnings * total_dis_given / 100;
-
-    const result = earnings - givenDisPr;
-
-    return result;
-}
-
-async function discountReceived ()
-{
-    const result = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'bill_amount' ) ),
-                    0
-                ),
-                'total_sales'
-            ],
-            [
-                Sequelize.fn(
-                    'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'discount_from_restaurant' ) ),
-                    0
-                ),
-                'discount_from_restaurant'
-            ]
-        ],
-    } );
-
-    const total_sales_res = parseFloat( result[ 0 ].dataValues.total_sales );
-    const discount_from_restaurant_res = parseFloat( result[ 0 ].dataValues.discount_from_restaurant );
-
-    const total_discount_received = total_sales_res * discount_from_restaurant_res / 100;
-
-    return total_discount_received;
-}
-
-async function totalDiscountGiven ()
-{
-    const result = await db.orders.findAll( {
-        attributes: [
-            [
-                Sequelize.literal( 'COALESCE(SUM(CAST(orders.discount_to_customer AS DECIMAL)) + (SUM(CAST(orders.magic_coupon_discount AS DECIMAL))), 0)' ),
-                'total_discount_given'
-            ]
-        ],
-    } );
-
-    const total_discount_given = parseFloat( result[ 0 ].dataValues.total_discount_given );
-
-    return total_discount_given;
 }

@@ -1,6 +1,7 @@
 const moment = require( 'moment' );
 const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
+const Op = db.Op;
 
 exports.getCustomerHomePage = async ( req, res ) =>
 {
@@ -28,155 +29,218 @@ exports.searchRestaurant = async ( req, res ) =>
 {
     try
     {
-        const category = req.query.category;
-        const { name, startTime, endTime, offer } = req.body;
+        const { name, startTime, endTime, offer, category } = req.body;
 
-        let restaurants, formattedRestaurants;
+        let restaurants, formattedRestaurants, formattedDiscounts;
 
         const orderOptions = {
-            include: [ {
-                model: db.restaurant_discounts,
-                as: 'discounts',
-                attributes: [ 'discount_json' ],
-            } ],
+            include: [
+                {
+                    model: db.restaurant_discounts,
+                    as: 'discounts',
+                    attributes: [ 'discount_json' ],
+                },
+                {
+                    model: db.restaurant_profile_photos,
+                    as: 'profile_photos',
+                    attributes: [ 'set_store_thumbnail_photo' ],
+                }
+            ],
             attributes: [ 'id', 'store_name', 'address', 'short_address' ],
         };
         if ( category )
         {
-            if ( category != 0 )
+            if ( category !== 0 )
             {
                 orderOptions.where = {
                     category_id: category
                 };
+                restaurants = await db.restaurants.findAll( orderOptions );
+                formattedRestaurants = restaurants.map( ( restaurant ) =>
+                {
+                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                        ? JSON.parse( restaurant.discounts.discount_json )
+                        : [];
+
+                    return {
+                        id: restaurant.id,
+                        store_name: restaurant.store_name,
+                        address: restaurant.address,
+                        short_address: restaurant.short_address,
+                        discount: discounts,
+                        thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+                    };
+                } );
+            } else
+            {
+                restaurants = await db.restaurants.findAll( orderOptions );
+                formattedRestaurants = restaurants.map( ( restaurant ) =>
+                {
+                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                        ? JSON.parse( restaurant.discounts.discount_json )
+                        : [];
+
+                    return {
+                        id: restaurant.id,
+                        store_name: restaurant.store_name,
+                        address: restaurant.address,
+                        short_address: restaurant.short_address,
+                        discount: discounts,
+                        thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+                    };
+                } );
             }
         }
 
         if ( name )
         {
             orderOptions.where = {
-                store_name: name
+                store_name: {
+                    [ Op.like ]: `%${ name }%`
+                }
             };
             restaurants = await db.restaurants.findAll( orderOptions );
-            formattedRestaurants = restaurants.map( ( restaurant ) =>
+            formattedRestaurants = restaurants.filter( restaurant =>
+            {
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
+                return discounts.some( discount => discount.discount_percentage > 0 );
+            } ).map( ( restaurant ) =>
             {
                 const discounts = restaurant.discounts && restaurant.discounts.discount_json
                     ? JSON.parse( restaurant.discounts.discount_json )
-                    : null;
+                    : [];
 
+                formattedDiscounts = discounts.map( discount => ( {
+                    ...discount,
+                    discount: parseInt( discount.discount ),
+                    discount_percentage: parseInt( discount.discount_percentage ),
+                    discount_commission: parseInt( discount.discount_commission )
+                } ) );
+                console.log( "formattedDiscounts: ", formattedDiscounts );
                 return {
                     id: restaurant.id,
                     store_name: restaurant.store_name,
                     address: restaurant.address,
                     short_address: restaurant.short_address,
-                    discount: discounts ? discounts : []
+                    discount: formattedDiscounts,
+                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
                 };
-            } );
-        } else if ( offer )
-        {
-            if ( offer === "high_to_low" )
-            {
-                orderOptions.order = [
-                    [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), 'DESC' ],
-                ];
-                restaurants = await db.restaurants.findAll( orderOptions );
-                formattedRestaurants = restaurants.map( ( restaurant ) =>
-                {
-                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                        ? JSON.parse( restaurant.discounts.discount_json )
-                        : null;
-
-                    if ( Array.isArray( discounts ) )
-                    {
-                        discounts.sort( ( a, b ) => b.discount_percentage - a.discount_percentage );
-                    }
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: discounts ? discounts : []
-                    };
-                } );
-            }
-            else
-            {
-                orderOptions.order = [
-                    [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), 'ASC' ],
-                ];
-                restaurants = await db.restaurants.findAll( orderOptions );
-                formattedRestaurants = restaurants.map( ( restaurant ) =>
-                {
-                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                        ? JSON.parse( restaurant.discounts.discount_json )
-                        : null;
-
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: discounts ? discounts : []
-                    };
-                } );
-            }
-        } else if ( startTime && endTime )
-        {
-            restaurants = await db.restaurants.findAll( orderOptions );
-            formattedRestaurants = restaurants.map( ( restaurant ) =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                    ? JSON.parse( restaurant.discounts.discount_json )
-                    : null;
-
-                if ( discounts )
-                {
-                    const filteredDiscounts = discounts.filter( ( discount ) =>
-                    {
-                        return (
-                            moment( discount.start_time, 'hh:mma' ).isSame( moment( startTime, 'hh:mma' ) ) &&
-                            moment( discount.end_time, 'hh:mma' ).isSame( moment( endTime, 'hh:mma' ) )
-                        );
-                    } );
-
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: filteredDiscounts.map( ( d ) => ( {
-                            discount_percentage: d.discount_percentage,
-                        } ) ),
-                    };
-                } else
-                {
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: [],
-                    };
-                }
-            } );
-        } else
-        {
-            restaurants = await db.restaurants.findAll( orderOptions );
-            formattedRestaurants = restaurants.map( ( restaurant ) =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                    ? JSON.parse( restaurant.discounts.discount_json )
-                    : null;
-
-                return {
-                    id: restaurant.id,
-                    store_name: restaurant.store_name,
-                    address: restaurant.address,
-                    short_address: restaurant.short_address,
-                    discount: discounts ? discounts : []
-                };
-
             } );
         }
+        if ( offer )
+        {
+            const discountOrder = offer === "high_to_low" ? "DESC" : "ASC";
+            orderOptions.order = [
+                [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), discountOrder ],
+            ];
+            restaurants = await db.restaurants.findAll( orderOptions );
+
+            formattedRestaurants = restaurants.filter( restaurant =>
+            {
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
+                return discounts.some( discount => discount.discount_percentage > 0 );
+            } ).map( ( restaurant ) =>
+            {
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                    ? JSON.parse( restaurant.discounts.discount_json )
+                    : [];
+
+                formattedDiscounts = discounts.map( discount => ( {
+                    ...discount,
+                    discount: parseInt( discount.discount ),
+                    discount_percentage: parseInt( discount.discount_percentage ),
+                    discount_commission: parseInt( discount.discount_commission )
+                } ) );
+
+
+                if ( Array.isArray( formattedDiscounts ) )
+                {
+                    if ( offer === "high_to_low" )
+                    {
+                        formattedDiscounts.sort( ( a, b ) => b.discount_percentage - a.discount_percentage ); // Sort in descending order
+                    } else
+                    {
+                        formattedDiscounts.sort( ( a, b ) => a.discount_percentage - b.discount_percentage ); // Sort in ascending order
+                    }
+                }
+                return {
+                    id: restaurant.id,
+                    store_name: restaurant.store_name,
+                    address: restaurant.address,
+                    short_address: restaurant.short_address,
+                    discount: formattedDiscounts,
+                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+                };
+            } );
+
+        }
+        if ( startTime && endTime )
+        {
+            restaurants = await db.restaurants.findAll( orderOptions );
+            formattedRestaurants = restaurants.filter( restaurant =>
+            {
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
+                return discounts.some( discount => discount.discount_percentage > 0 );
+            } ).map( ( restaurant ) =>
+            {
+                const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                    ? JSON.parse( restaurant.discounts.discount_json )
+                    : [];
+
+                formattedDiscounts = discounts.map( discount => ( {
+                    ...discount,
+                    discount: parseInt( discount.discount ),
+                    discount_percentage: parseInt( discount.discount_percentage ),
+                    discount_commission: parseInt( discount.discount_commission )
+                } ) );
+
+                const filteredDiscounts = formattedDiscounts.filter( ( discount ) =>
+                {
+                    return (
+                        moment( discount.start_time, 'hh:mma' ).isSame( moment( startTime, 'hh:mma' ) ) &&
+                        moment( discount.end_time, 'hh:mma' ).isSame( moment( endTime, 'hh:mma' ) )
+                    );
+                } );
+
+                return {
+                    id: restaurant.id,
+                    store_name: restaurant.store_name,
+                    address: restaurant.address,
+                    short_address: restaurant.short_address,
+                    discount: filteredDiscounts.map( ( d ) => ( {
+                        discount_percentage: d.discount_percentage,
+                    } ) ),
+                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+                };
+
+            } );
+
+        }
+        restaurants = await db.restaurants.findAll( orderOptions );
+        formattedRestaurants = restaurants.map( ( restaurant ) =>
+        {
+            const discounts = restaurant.discounts && restaurant.discounts.discount_json
+                ? JSON.parse( restaurant.discounts.discount_json )
+                : [];
+
+            formattedDiscounts = discounts.map( discount => ( {
+                ...discount,
+                discount: parseInt( discount.discount ),
+                discount_percentage: parseInt( discount.discount_percentage ),
+                discount_commission: parseInt( discount.discount_commission )
+            } ) );
+
+            return {
+                id: restaurant.id,
+                store_name: restaurant.store_name,
+                address: restaurant.address,
+                short_address: restaurant.short_address,
+                discount: formattedDiscounts,
+                thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+            };
+
+        } );
+
         const data = {
             restaurants: formattedRestaurants
         };

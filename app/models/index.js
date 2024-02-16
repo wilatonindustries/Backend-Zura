@@ -35,7 +35,6 @@ db.restaurant_documents = require( "./restaurantDocuments.model.js" )( sequelize
 db.restaurant_profile_photos = require( "./restaurantProfilePhotos.model.js" )( sequelize, Sequelize, DataTypes );
 db.restaurant_discounts = require( "./restaurantDiscounts.model.js" )( sequelize, Sequelize, DataTypes );
 db.coupons = require( "./coupon.model.js" )( sequelize, Sequelize, DataTypes );
-db.restaurant_coupons = require( "./restaurantCoupon.model.js" )( sequelize, Sequelize, DataTypes );
 
 db.user = require( "./users.model.js" )( sequelize, Sequelize, DataTypes );
 db.user_verification_codes = require( "./userVerificationCodes.model.js" )( sequelize, Sequelize, DataTypes );
@@ -44,6 +43,14 @@ db.customer = require( "./customers.model.js" )( sequelize, Sequelize, DataTypes
 db.customer_details = require( "./customerDetails.model.js" )( sequelize, Sequelize, DataTypes );
 db.customer_verification_codes = require( "./customerVerificationCodes.model.js" )( sequelize, Sequelize, DataTypes );
 db.orders = require( "./orders.model.js" )( sequelize, Sequelize, DataTypes );
+
+db.configurations = require( "./configurations.model.js" )( sequelize, Sequelize, DataTypes );
+
+db.payment_orders = require( "./paymentOrders.model.js" )( sequelize, Sequelize, DataTypes );
+
+db.restaurants_payouts = require( "./restaurantPayouts.model.js" )( sequelize, Sequelize, DataTypes );
+
+db.payout_histories = require( "./payoutHistories.model.js" )( sequelize, Sequelize, DataTypes );
 
 // associations
 
@@ -60,16 +67,29 @@ db.restaurant_discounts.belongsTo( db.restaurants, { foreignKey: 'restaurant_id'
 db.restaurants.hasMany( db.orders, { foreignKey: 'restaurant_id', as: 'orders' } );
 db.orders.belongsTo( db.restaurants, { foreignKey: "restaurant_id", as: 'restaurant' } );
 
-db.customer.hasMany( db.customer_details, { foreignKey: 'customer_id' } );
-db.customer_details.belongsTo( db.customer, { foreignKey: "customer_id" } );
+db.customer.hasMany( db.customer_details, { foreignKey: 'customer_id', as: 'customer_details' } );
+db.customer_details.belongsTo( db.customer, { foreignKey: "customer_id", as: 'customer' } );
 
 db.customer.hasMany( db.orders, { foreignKey: 'customer_id', as: 'orders' } );
 db.orders.belongsTo( db.customer, { foreignKey: "customer_id", as: "customer" } );
 
-db.coupons.hasMany( db.restaurant_coupons, { foreignKey: 'coupon_id', as: 'restaurant_coupon' } );
-db.restaurant_coupons.belongsTo( db.coupons, { foreignKey: 'coupon_id', as: 'coupon' } );
+db.restaurants.hasMany( db.payment_orders, { foreignKey: 'restaurant_id', as: 'payment_orders' } );
+db.payment_orders.belongsTo( db.restaurants, { foreignKey: "restaurant_id", as: 'restaurant' } );
 
-db.restaurants.hasOne( db.restaurant_coupons, { foreignKey: 'restaurant_id', as: 'restaurant_coupon' } );
-db.restaurant_coupons.belongsTo( db.restaurants, { foreignKey: 'restaurant_id', as: 'restaurant' } );
+db.customer.hasMany( db.payment_orders, { foreignKey: 'customer_id', as: 'payment_orders' } );
+db.payment_orders.belongsTo( db.customer, { foreignKey: "customer_id", as: 'customer' } );
+
+db.restaurants.hasOne( db.restaurants_payouts, { foreignKey: 'restaurant_id', as: 'restaurants_payouts' } );
+db.restaurants_payouts.belongsTo( db.restaurants, { foreignKey: "restaurant_id", as: 'restaurant' } );
+
+db.user.hasOne( db.restaurants_payouts, { foreignKey: 'user_id', as: 'restaurants_payouts' } );
+db.restaurants_payouts.belongsTo( db.user, { foreignKey: 'user_id', as: 'user' } );
+
+db.restaurants.hasOne( db.payout_histories, { foreignKey: 'restaurant_id', as: 'payout_histories' } );
+db.payout_histories.belongsTo( db.restaurants, { foreignKey: "restaurant_id", as: 'restaurant' } );
+
+db.user.hasOne( db.payout_histories, { foreignKey: 'user_id', as: 'payout_histories' } );
+db.payout_histories.belongsTo( db.user, { foreignKey: 'user_id', as: 'user' } );
+
 
 module.exports = db;

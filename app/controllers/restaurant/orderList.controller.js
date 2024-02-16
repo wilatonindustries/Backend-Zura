@@ -9,6 +9,8 @@ exports.getOrderList = async ( req, res ) =>
         const userId = req.userId;
         const { sort, date, timing } = req.body;
 
+        let ordersList = [];
+
         const orderOptions = {
             include: [
                 {
@@ -19,9 +21,15 @@ exports.getOrderList = async ( req, res ) =>
                         user_id: userId
                     },
                     require: false
+                },
+                {
+                    model: db.customer,
+                    attributes: [ "id", "name" ],
+                    as: "customer",
+                    require: false
                 }
             ],
-            attributes: [ 'transaction_id', 'bill_amount', 'discount_given_by_customer', 'createdAt' ],
+            attributes: [ 'transaction_id', 'bill_amount', 'createdAt', 'is_paid' ],
         };
         if ( sort === 'high_to_low' )
         {
@@ -43,8 +51,23 @@ exports.getOrderList = async ( req, res ) =>
             };
         }
 
-        const total_orders = await db.orders.findAll( orderOptions );
-        return getResult( res, 200, total_orders, "order list fetched successfully." );
+        const orders = await db.orders.findAll( orderOptions );
+
+        orders.forEach( order =>
+        {
+            const customer = order.customer;
+
+            ordersList.push( {
+                customer_name: customer ? customer.name : '',
+                transaction_id: order.transaction_id,
+                bill_amount: order.bill_amount,
+                created_date: order.createdAt,
+                is_paid: order.is_paid,
+            } );
+        } );
+
+        const data = { order_list: ordersList };
+        return getResult( res, 200, data, "order list fetched successfully." );
     } catch ( error )
     {
         console.error( "error in fetch order list : ", error );

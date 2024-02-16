@@ -8,5 +8,7 @@ module.exports = app =>
 
     customerRouter.post( "/list", customerController.customerList );
 
-    app.use( '/api/admin/customer', [ adminVerify.verifyAccessToken ], customerRouter )
+    customerRouter.put( "/block-unblock/:id", customerController.blockOrUnblockCustomer );
+
+    app.use( '/api/admin/customer', [ adminVerify.verifyAccessToken ], customerRouter );
 };

@@ -3,6 +3,7 @@ const bodyParser = require( "body-parser" );
 const cors = require( "cors" );
 const config = require( "./app/config/config.js" );
 const { createAdmin } = require( "./app/controllers/admin/auth.controller.js" );
+require( './app/cronjob/cron.js' );
 
 const app = express();
 
@@ -56,12 +57,13 @@ require( "./app/routes/admin/restaurantDocuments.routes.js" )( app );
 require( "./app/routes/admin/restaurantProfilePhotos.routes.js" )( app );
 require( "./app/routes/admin/restaurantDiscounts.routes.js" )( app );
 require( "./app/routes/admin/coupon.routes.js" )( app );
-require( "./app/routes/admin/restaurantCoupon.routes.js" )( app );
 require( "./app/routes/admin/dashboard.routes.js" )( app );
 require( "./app/routes/admin/sales.routes.js" )( app );
 require( "./app/routes/admin/discountReceived.routes.js" )( app );
 require( "./app/routes/admin/rewardGivenCustomer.routes.js" )( app );
 require( "./app/routes/admin/storeShareGiven.routes.js" )( app );
+require( "./app/routes/admin/billAnalysis.routes.js" )( app );
+require( "./app/routes/admin/restaurantPayoutsHistories.routes.js" )( app );
 
 require( "./app/routes/restaurant/auth.routes.js" )( app );
 require( "./app/routes/restaurant/orderList.routes.js" )( app );
@@ -75,6 +77,7 @@ require( "./app/routes/customer/customerHomePage.routes.js" )( app );
 require( "./app/routes/customer/explore.routes.js" )( app );
 require( "./app/routes/customer/payment.routes.js" )( app );
 require( "./app/routes/customer/order.routes.js" )( app );
+require( "./app/routes/customer/reward.routes.js" )( app );
 
 // set port, listen for requests
 const PORT = config.PORT;

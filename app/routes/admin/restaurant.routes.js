@@ -7,7 +7,7 @@ module.exports = app =>
 
     const restaurantRouter = require( "express" ).Router();
 
-    restaurantRouter.put( "/owner/update", restaurantController.updateOwner );
+    restaurantRouter.put( "/owner/update", restaurantController.updateOwnerOrStore );
 
     restaurantRouter.post( "/", restaurantController.createRestaurant );
 

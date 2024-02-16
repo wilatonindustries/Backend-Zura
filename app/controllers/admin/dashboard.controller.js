@@ -29,15 +29,12 @@ exports.restaurantList = async ( req, res ) =>
         restaurantsDis.forEach( ( store ) =>
         {
             const restaurant = store.restaurant;
-            if ( restaurant && restaurant.user )
-            {
-                const owner = restaurant.user;
-                storeList.push( {
-                    store_id: restaurant?.id || null,
-                    store_name: restaurant?.store_name || '',
-                    owner_name: owner?.owner_name || '',
-                } );
-            }
+            const owner = restaurant.user;
+            storeList.push( {
+                store_id: restaurant?.id || null,
+                store_name: restaurant?.store_name || '',
+                owner_name: owner?.owner_name || '',
+            } );
         } );
 
         const data = {
@@ -72,7 +69,7 @@ exports.updateDiscount = async ( req, res ) =>
                 is_changes_accept: false
             }, {
                 where: {
-                    user_id: restaurant.user_id, restaurant_id: restaurant.id
+                    restaurant_id: restaurant.id
                 }
             } );
         } else
@@ -82,7 +79,7 @@ exports.updateDiscount = async ( req, res ) =>
                 is_changes_accept: false
             }, {
                 where: {
-                    user_id: restaurant.user_id, restaurant_id: restaurant.id
+                    restaurant_id: restaurant.id
                 }
             } );
         }
