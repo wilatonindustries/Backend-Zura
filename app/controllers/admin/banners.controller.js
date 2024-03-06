@@ -64,15 +64,21 @@ exports.update = async ( req, res ) =>
     {
         try
         {
-            fs.rmSync( `assets/${ banner.image }`, {
-                force: true,
-            } );
-            console.log( "Deleted previous banner image" );
+            if ( banner.image === null )
+            {
+                updatedValue.image = `${ bannerImagePath }/${ req.file.filename }`;
+            } else
+            {
+                fs.rmSync( `assets/${ banner.image }`, {
+                    force: true,
+                } );
+                console.log( "Deleted previous banner image" );
+                updatedValue.image = `${ bannerImagePath }/${ req.file.filename }`;
+            }
         } catch ( err )
         {
             console.error( "Error deleting previous banner image file:", err );
         }
-        updatedValue.image = `${ bannerImagePath }/${ req.file.filename }`;
     }
 
     await db.banners.update( updatedValue, {

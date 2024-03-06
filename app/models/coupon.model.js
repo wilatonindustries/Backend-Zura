@@ -11,6 +11,18 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 autoIncrement: true,
                 field: 'id'
             },
+            category_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                field: 'category_id',
+                references: { model: 'categories', key: 'id' }
+            },
+            restaurant_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                field: 'restaurant_id',
+                references: { model: 'restaurants', key: 'id' }
+            },
             description: {
                 type: DataTypes.STRING,
                 allowNull: true,

@@ -10,7 +10,7 @@ exports.addProfilePhoto = async ( req, res ) =>
         const { type, restaurant_id } = req.body;
         const profileField = getProfileField( type );
 
-        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
             return getErrorResult( res, 404, 'restaurant not found.' );
@@ -18,7 +18,7 @@ exports.addProfilePhoto = async ( req, res ) =>
 
         const profile = await db.restaurant_profile_photos.findOne( {
             where: {
-                user_id: restaurant.user_id, restaurant_id: restaurant.id
+                user_id: restaurant.user_id, restaurant_id: restaurant.id, is_delete: false
             }
         } );
 
@@ -32,7 +32,7 @@ exports.addProfilePhoto = async ( req, res ) =>
             );
             const updatedProfile = await db.restaurant_profile_photos.findOne( {
                 where: {
-                    restaurant_id: restaurant.id,
+                    restaurant_id: restaurant.id, is_delete: false
                 },
             } );
 
@@ -64,7 +64,7 @@ exports.addProfilePhoto = async ( req, res ) =>
 
             const updatedProfile = await db.restaurant_profile_photos.findOne( {
                 where: {
-                    restaurant_id: restaurant.id,
+                    restaurant_id: restaurant.id, is_delete: false
                 },
             } );
 
@@ -107,7 +107,7 @@ async function updateProfileField ( field, file, restaurantId, userId )
         : null;
 
     await db.restaurant_profile_photos.update( updateObject, {
-        where: { restaurant_id: restaurantId, user_id: userId },
+        where: { restaurant_id: restaurantId, user_id: userId, is_delete: false },
     } );
 }
 

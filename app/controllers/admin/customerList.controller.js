@@ -1,6 +1,8 @@
 const { getResult, getErrorResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { getDataForFilter } = require( "../../utils/helper" );
+const axios = require( 'axios' );
+const config = require( "../../config/config" );
 const Op = db.Op;
 
 exports.customerList = async ( req, res ) =>
@@ -123,15 +125,72 @@ exports.blockOrUnblockCustomer = async ( req, res ) =>
         if ( is_active === true )
         {
             await db.customer.update( { is_active }, { where: { id } } );
-            return getResult( res, 200, 1, "customers unblocked successfully." );
+            return getResult( res, 200, 1, "customer unblocked successfully." );
         } else
         {
             await db.customer.update( { is_active }, { where: { id } } );
-            return getResult( res, 200, 1, "customers blocked successfully." );
+            return getResult( res, 200, 1, "customer blocked successfully." );
         }
     } catch ( err )
     {
         console.error( "err in customer block or unblock : ", err );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    }
+};
+
+exports.sendNotification = async ( req, res ) =>
+{
+    try
+    {
+        const { title, message } = req.body;
+
+        let tokens = [];
+
+        const customers = await db.customer.findAll( {
+            where: {
+                fcm_token: { [ db.Sequelize.Op.not ]: null },
+                is_notified: true
+            }
+        } );
+
+        for ( let customer of customers )
+        {
+            tokens.push( customer.fcm_token );
+        }
+
+        const fcmApiKey = config.fcm.api_key;
+
+        const payload = {
+            registration_ids: tokens,
+            notification: {
+                title: title,
+                body: message,
+            },
+        };
+
+        if ( tokens.length > 0 )
+        {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `key=${ fcmApiKey }`
+            };
+
+            const response = await axios.post( 'https://fcm.googleapis.com/fcm/send', payload, { headers } );
+
+            if ( response.data.failure > 0 )
+            {
+                console.error( "Failed notifications:", response.data.results );
+            }
+
+
+            return getResult( res, 200, 1, "notification send successfully." );
+        } else
+        {
+            return getResult( res, 200, 1, "notification send successfully." );
+        }
+    } catch ( error )
+    {
+        console.error( "error in send notification in admin : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };

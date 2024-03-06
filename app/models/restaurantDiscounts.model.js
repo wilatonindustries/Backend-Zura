@@ -39,6 +39,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 field: 'is_changes_accept',
                 defaultValue: false
             },
+            is_delete: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true,
+                field: 'is_delete',
+                defaultValue: false
+            },
         }
     );
 

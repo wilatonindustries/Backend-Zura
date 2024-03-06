@@ -44,4 +44,10 @@ module.exports = function ( app )
         controller.updateProfile
     );
 
+    app.put(
+        "/api/customer/auth/manage-device-token",
+        [ customerVerify.verifyAccessToken ],
+        controller.manageDeviceToken
+    );
+
 };

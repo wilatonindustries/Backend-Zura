@@ -24,11 +24,13 @@ exports.restaurantList = async ( req, res ) =>
                             [ Op.like ]: `%${ name }%`
                         }
                     } ],
+                    is_delete: false
                 },
                 attributes: [ 'id', 'store_name', 'address', 'short_address' ],
                 include: [ {
                     model: db.restaurant_discounts,
                     as: 'discounts',
+                    where: { is_delete: false },
                     attributes: [ 'discount_json' ],
                 } ],
             } );
@@ -38,12 +40,14 @@ exports.restaurantList = async ( req, res ) =>
                 where: {
                     createdAt: {
                         [ Op.between ]: [ startDate, endDate ]
-                    }
+                    },
+                    is_delete: false
                 },
                 attributes: [ 'id', 'store_name', 'address', 'short_address' ],
                 include: [ {
                     model: db.restaurant_discounts,
                     as: 'discounts',
+                    where: { is_delete: false },
                     attributes: [ 'discount_json' ],
                 } ],
             } );
@@ -54,8 +58,10 @@ exports.restaurantList = async ( req, res ) =>
                 include: [ {
                     model: db.restaurant_discounts,
                     as: 'discounts',
+                    where: { is_delete: false },
                     attributes: [ 'discount_json' ],
                 } ],
+                where: { is_delete: false },
             } );
         }
         const formattedRestaurants = restaurants.map( ( restaurant ) =>
@@ -97,7 +103,7 @@ exports.getRestaurantDetailsById = async ( req, res ) =>
         const id = req.params.id;
 
         const restaurant = await db.restaurants.findOne( {
-            where: { id },
+            where: { id, is_delete: false },
             include: [
                 { model: db.restaurant_profile_photos, as: 'profile_photos' },
                 { model: db.restaurant_discounts, as: 'discounts' },

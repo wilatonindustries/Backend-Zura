@@ -30,7 +30,8 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     },
@@ -86,7 +87,8 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     }

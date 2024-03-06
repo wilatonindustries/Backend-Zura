@@ -29,7 +29,7 @@ exports.searchRestaurant = async ( req, res ) =>
 {
     try
     {
-        const { name, startTime, endTime, offer, category } = req.body;
+        const { name, startTime, endTime, offer, category, is_offer_default, latitude, longitude } = req.body;
 
         let restaurants, formattedRestaurants, formattedDiscounts;
 
@@ -38,184 +38,37 @@ exports.searchRestaurant = async ( req, res ) =>
                 {
                     model: db.restaurant_discounts,
                     as: 'discounts',
+                    where: { is_delete: false },
                     attributes: [ 'discount_json' ],
                 },
                 {
                     model: db.restaurant_profile_photos,
                     as: 'profile_photos',
+                    where: { is_delete: false },
                     attributes: [ 'set_store_thumbnail_photo' ],
                 }
             ],
-            attributes: [ 'id', 'store_name', 'address', 'short_address' ],
+            attributes: [ 'id', 'store_name', 'address', 'short_address', "google_link", 'category_id', 'latitude', 'longitude' ],
         };
-        if ( category )
+        orderOptions.where = {
+            is_delete: false
+        };
+        if ( category && category !== 0 )
         {
-            if ( category !== 0 )
-            {
-                orderOptions.where = {
-                    category_id: category
-                };
-                restaurants = await db.restaurants.findAll( orderOptions );
-                formattedRestaurants = restaurants.map( ( restaurant ) =>
-                {
-                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                        ? JSON.parse( restaurant.discounts.discount_json )
-                        : [];
-
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: discounts,
-                        thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
-                    };
-                } );
-            } else
-            {
-                restaurants = await db.restaurants.findAll( orderOptions );
-                formattedRestaurants = restaurants.map( ( restaurant ) =>
-                {
-                    const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                        ? JSON.parse( restaurant.discounts.discount_json )
-                        : [];
-
-                    return {
-                        id: restaurant.id,
-                        store_name: restaurant.store_name,
-                        address: restaurant.address,
-                        short_address: restaurant.short_address,
-                        discount: discounts,
-                        thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
-                    };
-                } );
-            }
+            Object.assign( orderOptions.where, {
+                category_id: category
+            } );
         }
 
         if ( name )
         {
-            orderOptions.where = {
+            Object.assign( orderOptions.where, {
                 store_name: {
                     [ Op.like ]: `%${ name }%`
                 }
-            };
-            restaurants = await db.restaurants.findAll( orderOptions );
-            formattedRestaurants = restaurants.filter( restaurant =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
-                return discounts.some( discount => discount.discount_percentage > 0 );
-            } ).map( ( restaurant ) =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                    ? JSON.parse( restaurant.discounts.discount_json )
-                    : [];
-
-                formattedDiscounts = discounts.map( discount => ( {
-                    ...discount,
-                    discount: parseInt( discount.discount ),
-                    discount_percentage: parseInt( discount.discount_percentage ),
-                    discount_commission: parseInt( discount.discount_commission )
-                } ) );
-                console.log( "formattedDiscounts: ", formattedDiscounts );
-                return {
-                    id: restaurant.id,
-                    store_name: restaurant.store_name,
-                    address: restaurant.address,
-                    short_address: restaurant.short_address,
-                    discount: formattedDiscounts,
-                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
-                };
             } );
         }
-        if ( offer )
-        {
-            const discountOrder = offer === "high_to_low" ? "DESC" : "ASC";
-            orderOptions.order = [
-                [ db.Sequelize.literal( 'CAST(JSON_UNQUOTE(JSON_EXTRACT(discounts.discount_json, "$[0].discount_percentage")) AS SIGNED)' ), discountOrder ],
-            ];
-            restaurants = await db.restaurants.findAll( orderOptions );
 
-            formattedRestaurants = restaurants.filter( restaurant =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
-                return discounts.some( discount => discount.discount_percentage > 0 );
-            } ).map( ( restaurant ) =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                    ? JSON.parse( restaurant.discounts.discount_json )
-                    : [];
-
-                formattedDiscounts = discounts.map( discount => ( {
-                    ...discount,
-                    discount: parseInt( discount.discount ),
-                    discount_percentage: parseInt( discount.discount_percentage ),
-                    discount_commission: parseInt( discount.discount_commission )
-                } ) );
-
-
-                if ( Array.isArray( formattedDiscounts ) )
-                {
-                    if ( offer === "high_to_low" )
-                    {
-                        formattedDiscounts.sort( ( a, b ) => b.discount_percentage - a.discount_percentage ); // Sort in descending order
-                    } else
-                    {
-                        formattedDiscounts.sort( ( a, b ) => a.discount_percentage - b.discount_percentage ); // Sort in ascending order
-                    }
-                }
-                return {
-                    id: restaurant.id,
-                    store_name: restaurant.store_name,
-                    address: restaurant.address,
-                    short_address: restaurant.short_address,
-                    discount: formattedDiscounts,
-                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
-                };
-            } );
-
-        }
-        if ( startTime && endTime )
-        {
-            restaurants = await db.restaurants.findAll( orderOptions );
-            formattedRestaurants = restaurants.filter( restaurant =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json ? JSON.parse( restaurant.discounts.discount_json ) : [];
-                return discounts.some( discount => discount.discount_percentage > 0 );
-            } ).map( ( restaurant ) =>
-            {
-                const discounts = restaurant.discounts && restaurant.discounts.discount_json
-                    ? JSON.parse( restaurant.discounts.discount_json )
-                    : [];
-
-                formattedDiscounts = discounts.map( discount => ( {
-                    ...discount,
-                    discount: parseInt( discount.discount ),
-                    discount_percentage: parseInt( discount.discount_percentage ),
-                    discount_commission: parseInt( discount.discount_commission )
-                } ) );
-
-                const filteredDiscounts = formattedDiscounts.filter( ( discount ) =>
-                {
-                    return (
-                        moment( discount.start_time, 'hh:mma' ).isSame( moment( startTime, 'hh:mma' ) ) &&
-                        moment( discount.end_time, 'hh:mma' ).isSame( moment( endTime, 'hh:mma' ) )
-                    );
-                } );
-
-                return {
-                    id: restaurant.id,
-                    store_name: restaurant.store_name,
-                    address: restaurant.address,
-                    short_address: restaurant.short_address,
-                    discount: filteredDiscounts.map( ( d ) => ( {
-                        discount_percentage: d.discount_percentage,
-                    } ) ),
-                    thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
-                };
-
-            } );
-
-        }
         restaurants = await db.restaurants.findAll( orderOptions );
         formattedRestaurants = restaurants.map( ( restaurant ) =>
         {
@@ -236,10 +89,78 @@ exports.searchRestaurant = async ( req, res ) =>
                 address: restaurant.address,
                 short_address: restaurant.short_address,
                 discount: formattedDiscounts,
-                thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo
+                thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo,
+                google_link: restaurant.google_link,
+                category_id: restaurant.category_id
             };
-
         } );
+
+        if ( offer && is_offer_default == true )
+        {
+            const filteredRestaurants = formattedRestaurants.filter( restaurant =>
+                restaurant.discount.some( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime
+                )
+            );
+
+            // Sort filtered restaurants based on discount percentage
+            filteredRestaurants.sort( ( a, b ) =>
+            {
+                const discountPercentageA = a.discount.find( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime
+                ).discount_percentage;
+                const discountPercentageB = b.discount.find( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime
+                ).discount_percentage;
+                return offer == "high_to_low" ? ( discountPercentageB - discountPercentageA ) : ( discountPercentageA - discountPercentageB );
+            } );
+
+            formattedRestaurants = filteredRestaurants;
+        }
+
+        if ( startTime && endTime && !offer )
+        {
+            const filteredRestaurants = formattedRestaurants.filter( restaurant =>
+                restaurant.discount.some( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime && discount.discount_percentage > 0
+                )
+            );
+
+            formattedRestaurants = filteredRestaurants;
+        }
+
+        if ( startTime && endTime && !is_offer_default && offer )
+        {
+            const filteredRestaurants = formattedRestaurants.filter( restaurant =>
+                restaurant.discount.some( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime && discount.discount_percentage > 0
+                )
+            );
+
+            // Sort filtered restaurants based on discount percentage
+            filteredRestaurants.sort( ( a, b ) =>
+            {
+                const discountPercentageA = a.discount.find( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime
+                ).discount_percentage;
+                const discountPercentageB = b.discount.find( discount =>
+                    discount.start_time === startTime && discount.end_time === endTime
+                ).discount_percentage;
+                return offer == "high_to_low" ? ( discountPercentageB - discountPercentageA ) : ( discountPercentageA - discountPercentageB );
+            } );
+
+            formattedRestaurants = filteredRestaurants;
+        }
+
+        if ( latitude && longitude )
+        {
+            const maxDistance = db.configurations.findOne( { where: { type: 'distance' }, attributes: [ 'value' ] } );
+            formattedRestaurants = formattedRestaurants.filter( restaurant =>
+            {
+                const distance = calculateDistance( latitude, longitude, restaurant.latitude, restaurant.longitude );
+                return distance <= maxDistance;
+            } );
+        }
 
         const data = {
             restaurants: formattedRestaurants
@@ -251,3 +172,17 @@ exports.searchRestaurant = async ( req, res ) =>
         return getErrorResult( res, 500, 'somthing went wrong.' );
     }
 };
+
+function calculateDistance ( lat1, lon1, lat2, lon2 )
+{
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = ( lat2 - lat1 ) * Math.PI / 180;
+    const dLon = ( lon2 - lon1 ) * Math.PI / 180;
+    const a =
+        Math.sin( dLat / 2 ) * Math.sin( dLat / 2 ) +
+        Math.cos( lat1 * Math.PI / 180 ) * Math.cos( lat2 * Math.PI / 180 ) *
+        Math.sin( dLon / 2 ) * Math.sin( dLon / 2 );
+    const c = 2 * Math.atan2( Math.sqrt( a ), Math.sqrt( 1 - a ) );
+    const distance = R * c; // Distance in kilometers
+    return distance;
+}

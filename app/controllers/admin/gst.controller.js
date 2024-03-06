@@ -24,7 +24,8 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     }
@@ -81,6 +82,7 @@ exports.totalGstBillWithFilter = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     }
                 ],

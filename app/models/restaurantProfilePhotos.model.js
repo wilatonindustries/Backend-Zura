@@ -78,6 +78,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 allowNull: true,
                 field: 'set_store_profile_photo'
             },
+            is_delete: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true,
+                field: 'is_delete',
+                defaultValue: false
+            },
         },
         {
             // Options

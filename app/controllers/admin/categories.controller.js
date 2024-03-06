@@ -67,15 +67,21 @@ exports.update = async ( req, res ) =>
     {
         try
         {
-            fs.rmSync( `assets/${ category.image }`, {
-                force: true,
-            } );
-            console.log( "Deleted previous category image" );
+            if ( category.image === null )
+            {
+                updatedValue.image = `${ categoryImagePath }/${ req.file.filename }`;
+            } else
+            {
+                fs.rmSync( `assets/${ category.image }`, {
+                    force: true,
+                } );
+                console.log( "Deleted previous category image" );
+                updatedValue.image = `${ categoryImagePath }/${ req.file.filename }`;
+            }
         } catch ( err )
         {
             console.error( "Error deleting previous category image file:", err );
         }
-        updatedValue.image = `${ categoryImagePath }/${ req.file.filename }`;
     }
 
     await db.categories.update( updatedValue, {

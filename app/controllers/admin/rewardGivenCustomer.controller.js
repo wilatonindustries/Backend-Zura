@@ -23,7 +23,8 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     },
@@ -54,7 +55,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
 
                 const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
-                const discountWorth = order.bill_amount - order.discount_given;
+                const discountWorth = order.bill_amount * discount / 100;
 
                 orderList.push( {
                     store_name: store ? store.store_name : '',
@@ -76,7 +77,8 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     },
@@ -102,7 +104,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
 
                 const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
-                const discountWorth = order.bill_amount - order.discount_given;
+                const discountWorth = order.bill_amount * discount / 100;
 
                 orderList.push( {
                     store_name: store ? store.store_name : '',
@@ -121,6 +123,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {
@@ -150,7 +153,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
 
                 const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
-                const discountWorth = order.bill_amount - order.discount_given;
+                const discountWorth = order.bill_amount * discount / 100;
 
                 orderList.push( {
                     store_name: store ? store.store_name : '',
@@ -169,6 +172,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {
@@ -193,7 +197,7 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
 
                 const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
-                const discountWorth = order.bill_amount - order.discount_given;
+                const discountWorth = order.bill_amount * discount / 100;
 
                 orderList.push( {
                     store_name: store ? store.store_name : '',

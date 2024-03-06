@@ -15,11 +15,13 @@ exports.reward = async ( req, res ) =>
                     model: db.restaurants,
                     attributes: [ "id", "store_name" ],
                     as: "restaurant",
+                    where: { is_delete: false },
                     require: false
                 }
             ],
             where: { customer_id: customerId },
-            attributes: [ "id", "order_date", "discount_given" ]
+            attributes: [ "id", "order_date", "discount_given" ],
+            order: [["order_date","DESC"]]
         } );
 
         orders.forEach( order =>

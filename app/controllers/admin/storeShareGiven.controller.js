@@ -24,7 +24,8 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     },
@@ -46,7 +47,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
             } );
 
             orders.forEach( order =>
@@ -60,7 +61,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                     bill_amount: order.bill_amount,
                     all_gst: order.gst,
                     total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision
+                    store_share_given: parseFloat( order.given_to_res ) + commision
                 } );
             } );
         } else if ( store_name )
@@ -74,7 +75,8 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     }
@@ -85,7 +87,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
             } );
 
             orders.forEach( order =>
@@ -99,7 +101,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                     bill_amount: order.bill_amount,
                     all_gst: order.gst,
                     total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision
+                    store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
         } else if ( customer_name )
@@ -110,6 +112,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {
@@ -130,7 +133,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
             } );
 
             orders.forEach( order =>
@@ -144,7 +147,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                     bill_amount: order.bill_amount,
                     all_gst: order.gst,
                     total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision
+                    store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
         } else
@@ -155,6 +158,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {
@@ -170,13 +174,12 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
-
                 const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
                     store_name: store ? store.store_name : '',
@@ -184,7 +187,7 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                     bill_amount: order.bill_amount,
                     all_gst: order.gst,
                     total_commision: commision,
-                    store_share_given: parseFloat( order.bill_amount ) + commision
+                    store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
         }
@@ -235,7 +238,8 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     },
@@ -286,7 +290,8 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         where: {
                             store_name: {
                                 [ Op.like ]: `%${ store_name }%`
-                            }
+                            },
+                            is_delete: false
                         },
                         require: false
                     }
@@ -323,6 +328,7 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {
@@ -369,6 +375,7 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                         model: db.restaurants,
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
+                        where: { is_delete: false },
                         require: false
                     },
                     {

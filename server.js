@@ -11,7 +11,7 @@ const corsOptions = {
   origin: "http://localhost:8081"
 };
 
-app.use( cors( corsOptions ) );
+app.use( cors() );
 
 // parse requests of content-type - application/json
 app.use( bodyParser.json() );
@@ -64,6 +64,10 @@ require( "./app/routes/admin/rewardGivenCustomer.routes.js" )( app );
 require( "./app/routes/admin/storeShareGiven.routes.js" )( app );
 require( "./app/routes/admin/billAnalysis.routes.js" )( app );
 require( "./app/routes/admin/restaurantPayoutsHistories.routes.js" )( app );
+require( "./app/routes/admin/timingBanners.routes.js" )( app );
+require( "./app/routes/admin/configurations.routes.js" )( app );
+require( "./app/routes/admin/staticComponents.routes.js" )( app );
+require( "./app/routes/admin/socialMedias.routes.js" )( app );
 
 require( "./app/routes/restaurant/auth.routes.js" )( app );
 require( "./app/routes/restaurant/orderList.routes.js" )( app );
@@ -78,6 +82,10 @@ require( "./app/routes/customer/explore.routes.js" )( app );
 require( "./app/routes/customer/payment.routes.js" )( app );
 require( "./app/routes/customer/order.routes.js" )( app );
 require( "./app/routes/customer/reward.routes.js" )( app );
+require( "./app/routes/customer/coupon.routes.js" )( app );
+require( "./app/routes/customer/staticComponents.routes.js" )( app );
+require( "./app/routes/customer/socialMedias.routes.js" )( app );
+require( "./app/routes/customer/timingBanners.routes.js" )( app );
 
 // set port, listen for requests
 const PORT = config.PORT;

@@ -10,7 +10,7 @@ exports.addDocument = async ( req, res ) =>
         const { type, restaurant_id } = req.body;
         const documentField = getDocumentField( type );
 
-        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
             return getErrorResult( res, 404, 'restaurant not found.' );
@@ -18,7 +18,7 @@ exports.addDocument = async ( req, res ) =>
 
         const document = await db.restaurant_documents.findOne( {
             where: {
-                user_id: restaurant.user_id, restaurant_id: restaurant.id
+                user_id: restaurant.user_id, restaurant_id: restaurant.id, is_delete: false
             }
         } );
         if ( document[ type ] === null )
@@ -31,7 +31,7 @@ exports.addDocument = async ( req, res ) =>
             );
             const updatedDoc = await db.restaurant_documents.findOne( {
                 where: {
-                    restaurant_id: restaurant.id,
+                    restaurant_id: restaurant.id, is_delete: false
                 },
             } );
 
@@ -62,7 +62,7 @@ exports.addDocument = async ( req, res ) =>
             );
             const updatedDoc = await db.restaurant_documents.findOne( {
                 where: {
-                    restaurant_id: restaurant.id,
+                    restaurant_id: restaurant.id, is_delete: false
                 },
             } );
 
@@ -97,6 +97,6 @@ async function updateDocumentField ( field, file, restaurantId, userId )
         : null;
 
     await db.restaurant_documents.update( updateObject, {
-        where: { restaurant_id: restaurantId, user_id: userId },
+        where: { restaurant_id: restaurantId, user_id: userId, is_delete: false },
     } );
 }

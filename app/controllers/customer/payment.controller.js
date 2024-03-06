@@ -42,7 +42,7 @@ exports.paymentOrderSummery = async ( req, res ) =>
             return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
         }
 
-        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
             return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
@@ -73,16 +73,16 @@ exports.paymentOrderSummery = async ( req, res ) =>
 
         const payAmt = bill_amount - ( discountedAmt + magicCouponDiscountAmt ) + convenience_fee;
 
-        const rzpResponse = await paymentIntent( payAmt );
+        // const rzpResponse = await paymentIntent( payAmt );
 
         const createPayment = await db.payment_orders.create( {
             customer_id: customer_id,
             restaurant_id: restaurant_id,
-            bill_amount: bill_amount,
+            bill_amount: payAmt,
             discount: discount,
             coupon_id: coupon_id ? coupon_id : null,
             order_timing: order_timing,
-            order_id: rzpResponse?.id || new Date().getTime(),
+            order_id: new Date().getTime(),
         } );
 
         const responseData = {

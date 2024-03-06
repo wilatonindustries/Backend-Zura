@@ -2,6 +2,7 @@ const { getErrorResult, getResult } = require( "../../base/baseController" );
 const db = require( "../../models" );
 const { encryptData, decryptdata } = require( "../../utils/helper" );
 const { generateJwtToken } = require( "./auth.helper" );
+const Op = db.Op;
 
 exports.sendCode = async ( req, res ) =>
 {
@@ -14,7 +15,11 @@ exports.sendCode = async ( req, res ) =>
       let code = '123456';
       let date = new Date();
 
-      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true, is_active: true } } );
+      const user = await db.user.findOne( {
+        where: {
+          owner_mobile: mobile
+        }
+      } );
 
       if ( user )
       {
@@ -41,6 +46,96 @@ exports.sendCode = async ( req, res ) =>
           }
         }
         else
+        {
+          const id = verificationCode.id;
+          const updateCode = await db.user_verification_codes.update(
+            {
+              code,
+              expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 )
+            },
+            {
+              where: { id, user_id: user.id, }
+            } );
+
+          if ( updateCode )
+          {
+            return getResult( res, 200, 1, "code sent successfully." );
+          } else
+          {
+            return getErrorResult( res, 500, 'somthing went wrong.' );
+          }
+        }
+      } else
+      {
+        const createUser = await db.user.create( { owner_mobile: mobile } );
+
+        const createCode = await db.user_verification_codes.create( {
+          user_id: createUser?.id,
+          nametext: createUser?.owner_mobile,
+          type: 'MOBILE',
+          code,
+          expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 ),
+        } );
+
+        if ( createCode )
+        {
+          return getResult( res, 200, 1, "code sent successfully." );
+        } else
+        {
+          return getErrorResult( res, 500, 'somthing went wrong.' );
+        }
+      }
+    } else
+    {
+      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+    }
+  } catch ( error )
+  {
+    console.error( "error in send code : ", error );
+    return getErrorResult( res, 500, 'somthing went wrong.' );
+  };
+};
+
+exports.resendCode = async ( req, res ) =>
+{
+  try
+  {
+    const mobile = req.body.mobile;
+    if ( mobile.length === 10 )
+    {
+      let code = '123456';
+      let date = new Date();
+
+      const user = await db.user.findOne( {
+        where: {
+          owner_mobile: mobile
+        }
+      } );
+      if ( user )
+      {
+        const verificationCode = await db.user_verification_codes.findOne( {
+          attributes: [ 'id', 'expired_date' ],
+          where: { nametext: user.owner_mobile }
+        } );
+
+        if ( !verificationCode )
+        {
+          const createCode = await db.user_verification_codes.create( {
+            user_id: user.id,
+            nametext: user.owner_mobile,
+            type: 'MOBILE',
+            code,
+            expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 ),
+          } );
+
+          if ( createCode )
+          {
+            return getResult( res, 200, 1, "code sent successfully." );
+          } else
+          {
+            return getErrorResult( res, 500, 'somthing went wrong.' );
+          }
+        } else
         {
           const id = verificationCode.id;
           const updateCode = await db.user_verification_codes.update(
@@ -86,80 +181,9 @@ exports.sendCode = async ( req, res ) =>
     }
   } catch ( error )
   {
-    console.error( "error in send code : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    console.error( "error in resend code : ", error );
+    return res.status( 500 ).json( { message: 'somthing went wrong' } );
   };
-};
-
-exports.resendCode = async ( req, res ) =>
-{
-  const mobile = req.body.mobile;
-
-  if ( mobile.length === 10 )
-  {
-    try
-    {
-      let code = '123456';
-      let date = new Date();
-
-      const user = await db.user.findOne( { where: { owner_mobile: mobile, is_accept: true, is_active: true } } );
-
-      if ( !user )
-      {
-        await db.user.create( { owner_name, owner_mobile, is_accept: true } );
-      }
-
-      const verificationCode = await db.user_verification_codes.findOne( {
-        attributes: [ 'id', 'expired_date' ],
-        where: { nametext: user.owner_mobile }
-      } );
-
-      if ( !verificationCode )
-      {
-        const createCode = await db.user_verification_codes.create( {
-          user_id: user.id,
-          nametext: user.owner_mobile,
-          type: 'MOBILE',
-          code,
-          expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 ),
-        } );
-
-        if ( createCode )
-        {
-          return getResult( res, 200, 1, "code sent successfully." );
-        } else
-        {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
-        }
-      } else
-      {
-        const id = verificationCode.id;
-        const updateCode = await db.user_verification_codes.update(
-          {
-            code,
-            expired_date: date.setTime( date.getTime() + 5 * 60 * 1000 )
-          },
-          {
-            where: { id }
-          } );
-
-        if ( updateCode )
-        {
-          return getResult( res, 200, 1, "code sent successfully." );
-        } else
-        {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
-        }
-      }
-    } catch ( error )
-    {
-      console.error( "error in resend code : ", error );
-      return res.status( 500 ).json( { message: 'somthing went wrong' } );
-    };
-  } else
-  {
-    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
-  }
 };
 
 exports.loginViaOtp = async ( req, res ) =>
@@ -185,13 +209,16 @@ exports.loginViaOtp = async ( req, res ) =>
         new Date( verficationCode.expired_date.getTime() + date.getTimezoneOffset() * 60000 )
       )
       {
-        const user = await db.user.findOne( { where: { owner_mobile: mobile, is_active: true } } );
+        const user = await db.user.findOne( { where: { owner_mobile: mobile, is_active: true, is_accept: true } } );
 
         let accessToken = null;
 
         if ( !user )
         {
-          return getErrorResult( res, 400, 'Invalid credential.' );
+          const result = {
+            is_verified: false
+          };
+          return getResult( res, 200, result, "Owner not verified, please wait for approval." );
         }
 
         const restaurant = await db.restaurants.findOne( { where: { user_id: user.id } } );
@@ -230,42 +257,46 @@ exports.updateProfile = async ( req, res ) =>
     const userId = req.userId;
 
     const userAuth = await db.user.findOne( { where: { id: userId } } );
-    if ( userAuth )
+
+    if ( !userAuth )
     {
-      if ( userAuth.email === null )
-      {
-        let updateUser = await db.user.update( {
-          owner_name: owner_name,
-          owner_mobile: owner_mobile,
-          is_profile_updated: true,
-        },
-          {
-            where: {
-              id: userId
-            }
-          } );
-        if ( !updateUser )
+      return getErrorResult( res, 404, 'not found.' );
+    }
+
+    if ( userAuth.email === null )
+    {
+      let updateUser = await db.user.update( {
+        owner_name: owner_name,
+        owner_mobile: owner_mobile,
+        is_profile_updated: true,
+      },
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
-        }
-      } else
+          where: {
+            id: userId
+          }
+        } );
+      if ( !updateUser )
       {
-        let updateUser = await db.user.update( {
-          owner_name: owner_name,
-          owner_mobile: owner_mobile,
-          is_profile_updated: true,
-        },
-          {
-            where: {
-              id: userId
-            }
-          } );
-        if ( !updateUser )
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+      }
+    } else
+    {
+      let updateUser = await db.user.update( {
+        owner_name: owner_name,
+        owner_mobile: owner_mobile,
+        is_profile_updated: true,
+      },
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
-        }
+          where: {
+            id: userId
+          }
+        } );
+      if ( !updateUser )
+      {
+        return getErrorResult( res, 500, 'somthing went wrong.' );
       }
     }
+
     return getResult( res, 200, 1, "profile updated successfully." );
   } catch ( error )
   {

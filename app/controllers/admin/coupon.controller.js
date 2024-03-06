@@ -7,16 +7,38 @@ exports.createCoupon = async ( req, res ) =>
 {
     try
     {
-        const { description, status, coupon_quantity, unique_coupon_codes, discount } = req.body;
+        const { description, status, coupon_quantity, unique_coupon_codes, discount, restaurant_id, category_id } = req.body;
 
         const couponStatus = status === 'inactive' ? 'inactive' : 'active';
+
+        let createdvalue = {};
+
+        if ( restaurant_id )
+        {
+            const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+            if ( !restaurant )
+            {
+                return getErrorResult( res, 404, 'restaurant not found.' );
+            }
+            createdvalue.restaurant_id = restaurant_id;
+        }
+        if ( category_id )
+        {
+            const category = await db.categories.findOne( { where: { id: category_id } } );
+            if ( !category )
+            {
+                return getErrorResult( res, 404, 'category not found.' );
+            }
+            createdvalue.category_id = category_id;
+        }
 
         const createCoupon = await db.coupons.create( {
             description: description ? description : null,
             status: couponStatus,
             coupon_quantity: coupon_quantity,
             unique_coupon_codes: unique_coupon_codes,
-            discount: discount
+            discount: discount,
+            ...createdvalue
         } );
 
         return getResult( res, 200, createCoupon, "coupon created successfully." );
@@ -92,7 +114,6 @@ exports.getCoupons = async ( req, res ) =>
     }
 };
 
-
 exports.getCouponById = async ( req, res ) =>
 {
     try
@@ -119,7 +140,7 @@ exports.updateCoupon = async ( req, res ) =>
     try
     {
         const id = req.params.id;
-        const { description, status, coupon_quantity, discount, unique_coupon_codes } = req.body;
+        const { description, status, coupon_quantity, discount, unique_coupon_codes, restaurant_id, category_id } = req.body;
 
         const coupon = await db.coupons.findByPk( id );
 
@@ -129,12 +150,34 @@ exports.updateCoupon = async ( req, res ) =>
         }
         const couponStatus = status === 'inactive' ? 'inactive' : 'active';
 
+        let updateValue = {};
+
+        if ( restaurant_id )
+        {
+            const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+            if ( !restaurant )
+            {
+                return getErrorResult( res, 404, 'restaurant not found.' );
+            }
+            updateValue.restaurant_id = restaurant_id;
+        }
+        if ( category_id )
+        {
+            const category = await db.categories.findOne( { where: { id: category_id } } );
+            if ( !category )
+            {
+                return getErrorResult( res, 404, 'category not found.' );
+            }
+            updateValue.category_id = category_id;
+        }
+
         const updateCoupon = await db.coupons.update( {
             description: description ? description : coupon.description,
             status: couponStatus,
             coupon_quantity: coupon_quantity ? coupon_quantity : coupon.coupon_quantity,
             discount: discount ? discount : coupon.discount,
-            unique_coupon_codes: unique_coupon_codes ? unique_coupon_codes : coupon.unique_coupon_codes
+            unique_coupon_codes: unique_coupon_codes ? unique_coupon_codes : coupon.unique_coupon_codes,
+            ...updateValue
         }, { where: { id } } );
 
         return getResult( res, 200, updateCoupon, "coupon updated successfully." );

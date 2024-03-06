@@ -10,5 +10,7 @@ module.exports = app =>
 
     customerRouter.put( "/block-unblock/:id", customerController.blockOrUnblockCustomer );
 
+    customerRouter.post( "/send-notification", customerController.sendNotification );
+
     app.use( '/api/admin/customer', [ adminVerify.verifyAccessToken ], customerRouter );
 };

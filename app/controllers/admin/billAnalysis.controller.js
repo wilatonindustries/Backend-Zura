@@ -21,7 +21,8 @@ exports.billAnalysis = async ( req, res ) =>
                         attributes: [ "id", "store_name" ],
                         as: "restaurant",
                         where: {
-                            id: store_id
+                            id: store_id,
+                            is_delete: false
                         },
                         require: false
                     },

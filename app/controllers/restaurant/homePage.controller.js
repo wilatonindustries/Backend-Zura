@@ -15,7 +15,8 @@ exports.homePage = async ( req, res ) =>
                     attributes: [],
                     as: "restaurant",
                     where: {
-                        user_id: userId
+                        user_id: userId,
+                        is_delete: false
                     },
                     require: false
                 }

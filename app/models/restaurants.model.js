@@ -57,7 +57,25 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 type: DataTypes.FLOAT,
                 allowNull: true,
                 field: 'gst_rate'
-            }
+            },
+            is_delete: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true,
+                field: 'is_delete',
+                defaultValue: false
+            },
+            longitude: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'longitude',
+                defaultValue: 0.00
+            },
+            latitude: {
+                type: DataTypes.DECIMAL,
+                allowNull: true,
+                field: 'latitude',
+                defaultValue: 0.00
+            },
         }
     );
 

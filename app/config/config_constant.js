@@ -12,6 +12,7 @@ const baseUrl = ( path = null ) =>
 
 const categoryImagePath = "uploads/category";
 const bannerImagePath = "uploads/banner";
+const timingBannerImagePath = "uploads/timingBanner";
 const restaurantDocsImagePath = "uploads/restaurant/documents";
 const restaurantProfileImagePath = "uploads/restaurant/profilePhotos";
 
@@ -20,5 +21,6 @@ module.exports = {
     categoryImagePath,
     bannerImagePath,
     restaurantDocsImagePath,
-    restaurantProfileImagePath
-}
+    restaurantProfileImagePath,
+    timingBannerImagePath
+};

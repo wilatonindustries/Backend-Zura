@@ -20,7 +20,7 @@ exports.createOrder = async ( req, res ) =>
             return getErrorResult( res, 404, `customer not found with customer id ${ customerId }` );
         }
 
-        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
             return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
@@ -135,7 +135,8 @@ exports.getAllOrders = async ( req, res ) =>
                 }
             ],
             where: { customer_id: customerId },
-            attributes: [ "id", "order_date", "discount_given", "bill_amount" ]
+            attributes: [ "id", "order_date", "discount_given", "bill_amount" ],
+            order: [["order_date","DESC"]]
         } );
 
         orders.forEach( order =>

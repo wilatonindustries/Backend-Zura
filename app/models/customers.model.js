@@ -56,10 +56,21 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
         allowNull: true,
         field: 'name'
       },
+      fcm_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        field: 'fcm_token'
+      },
+      is_notified: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
+        field: 'is_notified'
+      },
     },
     {
       // Options
-      
+
       underscrored: true,
     }
   );

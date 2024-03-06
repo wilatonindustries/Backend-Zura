@@ -175,7 +175,8 @@ exports.verifyCode = async ( req, res ) =>
                         device_name: device_name || null,
                         name: createCustomer?.name || null,
                         area_name: createCustomerDetail?.area_name || null,
-                        email: createCustomer?.email || null
+                        email: createCustomer?.email || null,
+                        is_notified: createCustomer?.is_notified
                     };
                     return getResult( res, 200, result, "mobile verified successfully." );
                 }
@@ -201,7 +202,8 @@ exports.verifyCode = async ( req, res ) =>
                     device_name: device_name || null,
                     name: customer.name || null,
                     area_name: customerDetail?.area_name || null,
-                    email: customer.email || null
+                    email: customer.email || null,
+                    is_notified: customer.is_notified
                 };
                 return getResult( res, 200, result, "mobile verified successfully." );
             } else
@@ -220,79 +222,66 @@ exports.updateProfile = async ( req, res ) =>
 {
     try
     {
-        const { name, area_name, email, mobile } = req.body;
+        const { name, area_name, email, mobile, is_notified } = req.body;
+
+        let updatedValue = {}, updateDetails = {};
 
         const customerId = req.customerId;
         const customerAuth = await db.customer.findOne( { where: { id: customerId } } );
 
-        if ( customerAuth )
+        if ( !customerAuth )
         {
-            if ( customerAuth.is_active === false )
-            {
-                return getErrorResult( res, 400, 'customer blocked.' );
-            }
-            if ( customerAuth.email === null )
-            {
-                let updateCustomerDetail = await db.customer_details.update( {
-                    area_name: area_name,
-                },
-                    {
-                        where: {
-                            customer_id: customerId
-                        }
-                    } );
-                let updateCustomer = await db.customer.update( {
-                    name: name,
-                    email: email,
-                    mobile: customerAuth.mobile
-                },
-                    {
-                        where: {
-                            id: customerId
-                        }
-                    } );
-                if ( !updateCustomer || !updateCustomerDetail )
-                {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
-                }
-                await db.customer.update( {
-                    is_profile_updated: true,
-                },
-                    {
-                        where: { id: customerId }
-                    } );
-            } else
-            {
-                let updateCustomerDetail = await db.customer_details.update( {
-                    area_name: area_name,
-                },
-                    {
-                        where: {
-                            customer_id: customerId
-                        }
-                    } );
-                let updateCustomer = await db.customer.update( {
-                    name: name,
-                    mobile: mobile,
-                    email: customerAuth.mobile
-                },
-                    {
-                        where: {
-                            id: customerId
-                        }
-                    } );
-                if ( !updateCustomer || !updateCustomerDetail )
-                {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
-                }
-                await db.customer.update( {
-                    is_profile_updated: true,
-                },
-                    {
-                        where: { id: customerId }
-                    } );
-            }
+            return getErrorResult( res, 404, 'not found.' );
         }
+
+        if ( customerAuth.is_active === false )
+        {
+            return getErrorResult( res, 400, 'customer blocked.' );
+        }
+
+        if ( area_name ) { updateDetails.area_name = area_name; }
+
+        const updateCustomerDetail = await db.customer_details.update( updateDetails, { where: { customer_id: customerId } } );
+
+        if ( name ) { updatedValue.name = name; }
+
+        if ( email )
+        {
+            const customer = await db.customer.findOne( { where: { email: email } } );
+
+            if ( customer )
+            {
+                return getErrorResult( res, 403, 'already exists .' );
+            }
+            updatedValue.email = customerAuth.email === null ? email : customerAuth.email;
+        }
+
+        if ( mobile )
+        {
+            const customer = await db.customer.findOne( { where: { mobile: mobile } } );
+
+            if ( customer )
+            {
+                return getErrorResult( res, 403, 'already exists .' );
+            }
+            updatedValue.mobile = customerAuth.mobile === null ? mobile : customerAuth.mobile;
+        }
+
+        if ( is_notified !== undefined ) { updatedValue.is_notified = is_notified; }
+
+        const updateCustomer = await db.customer.update( updatedValue, { where: { id: customerId } } );
+
+        if ( !updateCustomer || !updateCustomerDetail )
+        {
+            return getErrorResult( res, 500, 'somthing went wrong.' );
+        }
+        await db.customer.update( {
+            is_profile_updated: true,
+        },
+            {
+                where: { id: customerId }
+            } );
+
         return getResult( res, 200, 1, "profile updated successfully." );
     } catch ( error )
     {
@@ -338,7 +327,7 @@ exports.socialLogin = async ( req, res ) =>
                 mobile: customer.mobile || null,
                 email: customer.email || null,
                 is_social: customer.is_social,
-                customer_id: customer_id
+                is_notified: customer.is_notified
             };
             return getResult( res, 200, resultnew, "customer social login successfully." );
         } else
@@ -363,7 +352,7 @@ exports.socialLogin = async ( req, res ) =>
                 mobile: createCustomer?.mobile || null,
                 email: createCustomer?.email || null,
                 is_social: createCustomer.is_social,
-                customer_id: createCustomer?.id
+                is_notified: createCustomer?.is_notified
             };
             return getResult( res, 200, resultnew, "customer social login successfully." );
         }
@@ -384,6 +373,30 @@ exports.dataEncrypt = async ( req, res ) =>
     } catch ( error )
     {
         console.error( "error in customer data encrypt : ", error );
+        return getErrorResult( res, 500, 'somthing went wrong.' );
+    };
+
+};
+
+exports.manageDeviceToken = async ( req, res ) =>
+{
+    try
+    {
+        const { token } = req.body;
+
+        const customerId = req.customerId;
+        const customer = await db.customer.findOne( { where: { id: customerId } } );
+
+        if ( !customer )
+        {
+            return getErrorResult( res, 404, `customer not found.` );
+        }
+
+        await db.customer.update( { fcm_token: token }, { where: { id: customerId } } );
+        return getResult( res, 200, 1, "device token managed successfully." );
+    } catch ( error )
+    {
+        console.error( "error in manage device token : ", error );
         return getErrorResult( res, 500, 'somthing went wrong.' );
     };
 

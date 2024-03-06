@@ -52,7 +52,7 @@ exports.createRestaurant = async ( req, res ) =>
         const createdBankDetails = await db.restaurant_bank_account_details.create( {
             user_id: owner.id,
             restaurant_id: createdRestaurant.id,
-            ...( bankAccountDetails ? { bankAccountDetails } : {} ),
+            ...bankAccountDetails,
         } );
 
         const createDoc = await db.restaurant_documents.create( {
@@ -107,7 +107,7 @@ exports.restaurantList = async ( req, res ) =>
         const { store_name, filter } = req.body;
 
         let restaurants, storeList = [];
-        const total_store = await db.restaurants.count();
+        const total_store = await db.restaurants.count( { where: { is_delete: false } } );
         const orderOptions = {
             include: [
                 {
@@ -125,7 +125,8 @@ exports.restaurantList = async ( req, res ) =>
             orderOptions.where = {
                 store_name: {
                     [ Op.like ]: `%${ store_name }%`
-                }
+                },
+                is_delete: false
             };
             restaurants = await db.restaurants.findAll( orderOptions );
             restaurants.forEach( ( store ) =>
@@ -143,7 +144,8 @@ exports.restaurantList = async ( req, res ) =>
             orderOptions.where = {
                 createdAt: {
                     [ Op.between ]: [ startDate, endDate ]
-                }
+                },
+                is_delete: false
             };
             restaurants = await db.restaurants.findAll( orderOptions );
             restaurants.forEach( ( store ) =>
@@ -157,6 +159,9 @@ exports.restaurantList = async ( req, res ) =>
             } );
         } else
         {
+            orderOptions.where = {
+                is_delete: false
+            };
             restaurants = await db.restaurants.findAll( orderOptions );
             restaurants.forEach( ( store ) =>
             {
@@ -189,7 +194,8 @@ exports.getAllRestaurant = async ( req, res ) =>
             { model: db.restaurant_documents, as: 'documents' },
             { model: db.restaurant_profile_photos, as: 'profile_photos' },
             { model: db.restaurant_discounts, as: 'discounts' }
-        ]
+        ],
+        where: { is_delete: false }
     } )
         .then( data =>
         {
@@ -207,7 +213,7 @@ exports.getRestaurantById = async ( req, res ) =>
     const id = req.params.id;
 
     await db.restaurants.findOne( {
-        where: { id },
+        where: { id, is_delete: false },
         include: [
             { model: db.user, as: 'user' },
             { model: db.restaurant_bank_account_details, as: 'bank_details' },
@@ -241,7 +247,7 @@ exports.updateRestaurant = async ( req, res ) =>
             return getErrorResult( res, 404, 'category not found.' );
         } else
         {
-            const restaurant = await db.restaurants.findOne( { where: { id } } );
+            const restaurant = await db.restaurants.findOne( { where: { id, is_delete: false } } );
             if ( !restaurant )
             {
                 return getErrorResult( res, 404, `restaurant not found with id ${ id }` );
@@ -249,7 +255,7 @@ exports.updateRestaurant = async ( req, res ) =>
 
             const bankDetail = await db.restaurant_bank_account_details.findOne( {
                 where: {
-                    restaurant_id: restaurant.id
+                    restaurant_id: restaurant.id, is_delete: false
                 }
             } );
             if ( !bankDetail )
@@ -263,7 +269,7 @@ exports.updateRestaurant = async ( req, res ) =>
                     ...restaurantData
                 }, {
                     where: {
-                        id,
+                        id, is_delete: false
                     }
                 } );
             }
@@ -290,7 +296,7 @@ exports.updateRestaurant = async ( req, res ) =>
                     ...bankAccountDetails
                 }, {
                     where: {
-                        restaurant_id: restaurant.id
+                        restaurant_id: restaurant.id, is_delete: false
                     }
                 } );
             }
@@ -302,7 +308,7 @@ exports.updateRestaurant = async ( req, res ) =>
                     discount_json: JSON.stringify( discountData ),
                 }, {
                     where: {
-                        restaurant_id: restaurant.id
+                        restaurant_id: restaurant.id, is_delete: false
                     }
                 } );
             }
@@ -423,26 +429,29 @@ exports.deleteRestaurantById = async ( req, res ) =>
 {
     const id = req.params.id;
 
-    const restaurant = await db.restaurants.findOne( { where: { id } } );
+    const restaurant = await db.restaurants.findOne( { where: { id, is_delete: false } } );
     if ( !restaurant )
     {
         return getErrorResult( res, 404, `restaurant not found with id ${ id }` );
     }
 
     await db.restaurant_bank_account_details.destroy( {
-        where: { id, restaurant_id: restaurant.id },
+        where: { restaurant_id: restaurant.id },
     } );
     await db.restaurant_profile_photos.destroy( {
-        where: { id, restaurant_id: restaurant.id },
+        where: { restaurant_id: restaurant.id },
     } );
     await db.restaurant_documents.destroy( {
-        where: { id, restaurant_id: restaurant.id },
+        where: { restaurant_id: restaurant.id },
     } );
     await db.restaurant_discounts.destroy( {
-        where: { id, restaurant_id: restaurant.id },
+        where: { restaurant_id: restaurant.id },
     } );
     await db.restaurants.destroy( {
         where: { id },
+    } );
+    await db.user.destroy( {
+        id: restaurant.user_id
     } )
         .then( data =>
         {

@@ -27,7 +27,8 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                     attributes: [ "id" ],
                     as: "restaurant",
                     where: {
-                        user_id: userId
+                        user_id: userId,
+                        is_delete: false
                     },
                     require: false
                 }

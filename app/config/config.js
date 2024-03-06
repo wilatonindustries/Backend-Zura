@@ -36,5 +36,9 @@ module.exports = {
     secretKey: process.env.ENCRYPT_SECRET_KEY || '',
     secret_iv: process.env.SECRET_IV,
     encryption_method: process.env.ENCRYPTION_METHOD
-  }
+  },
+
+  fcm: {
+    api_key: process.env.FCM_API_KEY
+  },
 };

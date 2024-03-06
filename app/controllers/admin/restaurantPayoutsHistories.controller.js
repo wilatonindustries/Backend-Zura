@@ -21,6 +21,13 @@ exports.restaurantPayoutsOrHistories = async ( req, res ) =>
             restaurant_id = payout.restaurant_id;
             total_given_to_res = payout.total_given_to_res;
 
+            const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
+            if ( !restaurant )
+            {
+                return getErrorResult( res, 404, 'restaurant not found.' );
+            }
+
+
             const isPayout = await db.restaurants_payouts.findOne( { where: { user_id: user_id, restaurant_id: restaurant_id } } );
 
             if ( isPayout )

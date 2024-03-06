@@ -55,7 +55,7 @@ exports.updateDiscount = async ( req, res ) =>
     {
         const { restaurant_id, changes_discount_json } = req.body;
 
-        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+        const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
             return getErrorResult( res, 400, `restaurant not found with id ${ restaurant_id }.` );
@@ -69,7 +69,7 @@ exports.updateDiscount = async ( req, res ) =>
                 is_changes_accept: false
             }, {
                 where: {
-                    restaurant_id: restaurant.id
+                    restaurant_id: restaurant.id, is_delete: false
                 }
             } );
         } else
@@ -79,12 +79,12 @@ exports.updateDiscount = async ( req, res ) =>
                 is_changes_accept: false
             }, {
                 where: {
-                    restaurant_id: restaurant.id
+                    restaurant_id: restaurant.id, is_delete: false
                 }
             } );
         }
 
-        const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
+        const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id, is_delete: false } } );
         return getResult( res, 200, discount, "restaurant discount updated successfully." );
     } catch ( err )
     {

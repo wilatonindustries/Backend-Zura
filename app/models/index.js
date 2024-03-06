@@ -35,6 +35,9 @@ db.restaurant_documents = require( "./restaurantDocuments.model.js" )( sequelize
 db.restaurant_profile_photos = require( "./restaurantProfilePhotos.model.js" )( sequelize, Sequelize, DataTypes );
 db.restaurant_discounts = require( "./restaurantDiscounts.model.js" )( sequelize, Sequelize, DataTypes );
 db.coupons = require( "./coupon.model.js" )( sequelize, Sequelize, DataTypes );
+db.timing_banners = require( "./timingbanners.model.js" )( sequelize, Sequelize, DataTypes );
+db.static_components = require( "./staticComponents.model.js" )( sequelize, Sequelize, DataTypes );
+db.social_medias = require( "./socialMedias.model.js" )( sequelize, Sequelize, DataTypes );
 
 db.user = require( "./users.model.js" )( sequelize, Sequelize, DataTypes );
 db.user_verification_codes = require( "./userVerificationCodes.model.js" )( sequelize, Sequelize, DataTypes );

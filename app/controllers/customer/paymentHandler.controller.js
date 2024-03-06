@@ -46,7 +46,7 @@ exports.paymentHandler = async ( req, res ) =>
                 return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
             }
 
-            restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+            restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
             if ( !restaurant )
             {
                 return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
@@ -159,7 +159,7 @@ exports.paymentHandler = async ( req, res ) =>
                 return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
             }
 
-            restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
+            restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
             if ( !restaurant )
             {
                 return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );

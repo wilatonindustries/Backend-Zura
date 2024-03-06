@@ -48,6 +48,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 allowNull: true,
                 field: 'bank_name'
             },
+            is_delete: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true,
+                field: 'is_delete',
+                defaultValue: false
+            },
         },
         {
             // Options
