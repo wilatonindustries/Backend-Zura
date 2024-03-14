@@ -226,11 +226,11 @@ exports.totalRewardGivenToCustomerWithFilter = async ( req, res ) =>
                 total_discount_given_worth: totalDiscountGivenWorth
             }
         };
-        return getResult( res, 200, data, "total reward given to customer fetched successfully." );
+        return getResult( res, 200, data, "total reward given to customer fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch total reward given to customer : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

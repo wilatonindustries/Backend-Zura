@@ -6,11 +6,7 @@ module.exports = app =>
 
     const orderRouter = require( "express" ).Router();
 
-    orderRouter.post( "/", orderController.createOrder );
-
     orderRouter.get( "/", orderController.getAllOrders );
-
-    orderRouter.delete( "/:id", orderController.deleteOrder );
 
     app.use( '/api/customer/order', [ customerVerify.verifyAccessToken ], orderRouter );
 };

@@ -47,10 +47,10 @@ exports.homePage = async ( req, res ) =>
             total_sales: totalSales, total_earnings: totalEarnings
         };
 
-        return getResult( res, 200, data, "home page fetched successfully." );
+        return getResult( res, 200, data, "Home page data fetched successfully" );
     } catch ( error )
     {
         console.error( "error in get home page for restaurant : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

@@ -62,8 +62,8 @@ exports.createOrder = async ( req, res ) =>
             discount_commision = filteredDiscount.discount_commission;
         } else
         {
-            console.error( 'Order is NOT within discount time range.' );
-            return getErrorResult( res, 500, 'Something went wrong.' );
+            console.error( 'Order is NOT within discount time range' );
+            return getErrorResult( res, 500, 'Something went wrong' );
         }
 
         const convinenceFee = await db.configurations.findOne( { where: { type: 'convinence_fee' }, attributes: [ 'value' ] } );
@@ -109,11 +109,11 @@ exports.createOrder = async ( req, res ) =>
             order_timing: order_timing
         } );
 
-        return getResult( res, 200, createOrder, "order created successfully." );
+        return getResult( res, 200, createOrder, "Order created successfully" );
     } catch ( error )
     {
         console.error( "err in create order : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -129,14 +129,14 @@ exports.getAllOrders = async ( req, res ) =>
             include: [
                 {
                     model: db.restaurants,
-                    attributes: [ "id", "store_name", "address" ],
+                    attributes: [ "id", "store_name", "address", "short_address" ],
                     as: "restaurant",
                     require: false
                 }
             ],
             where: { customer_id: customerId },
             attributes: [ "id", "order_date", "discount_given", "bill_amount" ],
-            order: [["order_date","DESC"]]
+            order: [ [ "order_date", "DESC" ] ]
         } );
 
         orders.forEach( order =>
@@ -146,40 +146,16 @@ exports.getAllOrders = async ( req, res ) =>
             orderList.push( {
                 store_name: store ? store.store_name : '',
                 address: store ? store.address : '',
-                bill_amount: parseFloat( order.bill_amount ),
-                discount: parseFloat( order.discount_given ),
+                short_address: store ? store.short_address : '',
+                bill_amount: JSON.stringify( order.bill_amount ),
+                discount: JSON.stringify( order.discount_given ),
                 date: order.order_date,
             } );
         } );
-        return getResult( res, 200, orderList, "fetch all orders successfully." );
+        return getResult( res, 200, orderList, "Fetch all orders successfully" );
     } catch ( err )
     {
         console.error( "err in fetch all orders : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
-};
-
-exports.deleteOrder = async ( req, res ) =>
-{
-    const id = req.params.id;
-    const customerId = req.customerId;
-    const order = await db.orders.findOne( { where: { id, customer_id: customerId } } );
-
-    if ( !order )
-    {
-        return getErrorResult( res, 404, `order not found with order id ${ id }` );
-    }
-
-    await db.orders.destroy( {
-        where: { id, customer_id: customerId }
-    } )
-        .then( data =>
-        {
-            return getResult( res, 200, data, "order deleted successfully." );
-        } )
-        .catch( err =>
-        {
-            console.error( "err in delete order : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
-        } );
 };

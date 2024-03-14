@@ -12,12 +12,12 @@ exports.createRestaurant = async ( req, res ) =>
 
         if ( owner_mobile.length !== 10 )
         {
-            return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+            return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
         }
         const mobileExistOrNot = await db.user.findOne( { where: { owner_mobile } } );
         if ( mobileExistOrNot )
         {
-            return getErrorResult( res, 403, 'owner already exists .' );
+            return getErrorResult( res, 403, 'owner already exists ' );
         }
 
         const owner = await db.user.create( { owner_name, owner_mobile, is_accept: true } );
@@ -25,7 +25,7 @@ exports.createRestaurant = async ( req, res ) =>
         const category = await db.categories.findAll();
         if ( category.length === 0 )
         {
-            return getErrorResult( res, 404, 'category not found.' );
+            return getErrorResult( res, 404, 'category not found' );
         }
 
         const createdRestaurant = await db.restaurants.create( {
@@ -44,7 +44,7 @@ exports.createRestaurant = async ( req, res ) =>
                 } );
                 if ( existingBankDetails )
                 {
-                    return getErrorResult( res, 403, 'Bank account number already exists.' );
+                    return getErrorResult( res, 403, 'Bank account number already exists' );
                 }
             }
         }
@@ -92,11 +92,11 @@ exports.createRestaurant = async ( req, res ) =>
             profile_photos: createProfile
         };
 
-        return getResult( res, 200, data, "restaurant created successfully." );
+        return getResult( res, 200, data, "restaurant created successfully" );
     } catch ( error )
     {
         console.error( "error in creating restaurant : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -177,11 +177,11 @@ exports.restaurantList = async ( req, res ) =>
             total_store,
             store_list: storeList
         };
-        return getResult( res, 200, data, "store list fetched successfully." );
+        return getResult( res, 200, data, "store list fetched successfully" );
     } catch ( err )
     {
         console.error( "err in fetch store list : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -199,12 +199,12 @@ exports.getAllRestaurant = async ( req, res ) =>
     } )
         .then( data =>
         {
-            return getResult( res, 200, data, "fetch all restaurants successfully." );
+            return getResult( res, 200, data, "fetch all restaurants successfully" );
         } )
         .catch( err =>
         {
             console.error( "err in fetch all restaurants : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         } );
 };
 
@@ -224,12 +224,12 @@ exports.getRestaurantById = async ( req, res ) =>
     } )
         .then( data =>
         {
-            return getResult( res, 200, data, "fetch restaurants successfully." );
+            return getResult( res, 200, data, "fetch restaurants successfully" );
         } )
         .catch( err =>
         {
             console.error( "err in fetch restaurants : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         } );
 };
 
@@ -244,7 +244,7 @@ exports.updateRestaurant = async ( req, res ) =>
         const category = await db.categories.findAll();
         if ( category.length === 0 )
         {
-            return getErrorResult( res, 404, 'category not found.' );
+            return getErrorResult( res, 404, 'category not found' );
         } else
         {
             const restaurant = await db.restaurants.findOne( { where: { id, is_delete: false } } );
@@ -289,7 +289,7 @@ exports.updateRestaurant = async ( req, res ) =>
                     } );
                     if ( existingBankDetails )
                     {
-                        return getErrorResult( res, 403, 'Bank account number already exists.' );
+                        return getErrorResult( res, 403, 'Bank account number already exists' );
                     }
                 }
                 updatedBankDetails = await db.restaurant_bank_account_details.update( {
@@ -318,12 +318,12 @@ exports.updateRestaurant = async ( req, res ) =>
                 discounts: updateDis,
             };
 
-            return getResult( res, 200, data, "restaurant updated successfully." );
+            return getResult( res, 200, data, "restaurant updated successfully" );
         }
     } catch ( error )
     {
         console.error( "error in updating restaurant : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -356,12 +356,12 @@ exports.updateOwnerOrStore = async ( req, res ) =>
                         } );
                     if ( !updateUser )
                     {
-                        return getErrorResult( res, 500, 'somthing went wrong.' );
+                        return getErrorResult( res, 500, 'Somthing went wrong' );
                     }
-                    return getResult( res, 200, 1, "owner updated successfully." );
+                    return getResult( res, 200, 1, "owner updated successfully" );
                 } else
                 {
-                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
                 }
             } else if ( owner_mobile )
             {
@@ -378,12 +378,12 @@ exports.updateOwnerOrStore = async ( req, res ) =>
                         } );
                     if ( !updateUser )
                     {
-                        return getErrorResult( res, 500, 'somthing went wrong.' );
+                        return getErrorResult( res, 500, 'Somthing went wrong' );
                     }
-                    return getResult( res, 200, 1, "owner updated successfully." );
+                    return getResult( res, 200, 1, "owner updated successfully" );
                 } else
                 {
-                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+                    return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
                 }
             } else if ( owner_name )
             {
@@ -398,9 +398,9 @@ exports.updateOwnerOrStore = async ( req, res ) =>
                     } );
                 if ( !updateUser )
                 {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
+                    return getErrorResult( res, 500, 'Somthing went wrong' );
                 }
-                return getResult( res, 200, 1, "owner updated successfully." );
+                return getResult( res, 200, 1, "owner updated successfully" );
             }
         } else if ( store_name )
         {
@@ -416,12 +416,12 @@ exports.updateOwnerOrStore = async ( req, res ) =>
                     id: restaurant_id,
                 }
             } );
-            return getResult( res, 200, 1, "restaurant updated successfully." );
+            return getResult( res, 200, 1, "restaurant updated successfully" );
         }
     } catch ( error )
     {
         console.error( "error in update owner or owner : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 };
 
@@ -435,31 +435,32 @@ exports.deleteRestaurantById = async ( req, res ) =>
         return getErrorResult( res, 404, `restaurant not found with id ${ id }` );
     }
 
-    await db.restaurant_bank_account_details.destroy( {
+    await db.restaurant_bank_account_details.update( { is_delete: true }, {
         where: { restaurant_id: restaurant.id },
     } );
-    await db.restaurant_profile_photos.destroy( {
+    await db.restaurant_profile_photos.update( { is_delete: true }, {
         where: { restaurant_id: restaurant.id },
     } );
-    await db.restaurant_documents.destroy( {
+    await db.restaurant_documents.update( { is_delete: true }, {
         where: { restaurant_id: restaurant.id },
     } );
-    await db.restaurant_discounts.destroy( {
+    await db.restaurant_discounts.update( { is_delete: true }, {
         where: { restaurant_id: restaurant.id },
     } );
-    await db.restaurants.destroy( {
+    await db.restaurants.update( { is_delete: true }, {
         where: { id },
     } );
-    await db.user.destroy( {
-        id: restaurant.user_id
-    } )
+    await db.user_verification_codes.destroy( {
+        where: { user_id: restaurant.user_id }
+    } );
+    await db.user.update( { is_active: false }, { where: { id: restaurant.user_id } } )
         .then( data =>
         {
-            return getResult( res, 200, data, "restaurant deleted successfully." );
+            return getResult( res, 200, data, "restaurant deleted successfully" );
         } )
         .catch( err =>
         {
             console.error( "err in delete restaurant : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         } );
 };

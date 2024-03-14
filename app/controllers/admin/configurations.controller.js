@@ -7,11 +7,11 @@ exports.getConfigurations = async ( req, res ) =>
     {
         const configurations = await db.configurations.findAll();
 
-        return getResult( res, 200, configurations ? configurations : [], "configurations list fetched successfully." );
+        return getResult( res, 200, configurations ? configurations : [], "Configurations list fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch configurations : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -25,15 +25,15 @@ exports.updateConfigurations = async ( req, res ) =>
 
         if ( !configuration )
         {
-            return getErrorResult( res, 404, `configuration not found with type ${ type }` );
+            return getErrorResult( res, 404, `Configuration not found with type ${ type }` );
         }
 
         await db.configurations.update( { value: value }, { where: { type: type } } );
 
-        return getResult( res, 200, 1, "configuration updated successfully." );
+        return getResult( res, 200, 1, "Configuration updated successfully" );
     } catch ( error )
     {
         console.error( "error in update configurations : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

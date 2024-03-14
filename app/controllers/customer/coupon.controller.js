@@ -44,10 +44,10 @@ exports.getCouponList = async ( req, res ) =>
             couponList.push( ...coupon );
         }
 
-        return getResult( res, 200, couponList ? couponList : [], "coupon list fetched successfully." );
+        return getResult( res, 200, couponList ? couponList : [], "Coupon list fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch coupon list : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

@@ -24,7 +24,7 @@ exports.generateHashPwd = async ( password ) =>
     } catch ( error )
     {
         console.error( "error in generate hash password : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -38,6 +38,6 @@ exports.comparePwd = async ( Pwd, hashedPwd ) =>
     } catch ( error )
     {
         console.error( "error in generate hash password : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

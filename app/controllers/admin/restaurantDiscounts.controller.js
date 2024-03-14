@@ -75,7 +75,7 @@ exports.discountChanges = async ( req, res ) =>
             }, { where: { restaurant_id: restaurant.id } } );
 
             const discountData = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id, is_delete: false } } );
-            return getResult( res, 200, discountData, "discount changes accepted successfully." );
+            return getResult( res, 200, discountData, "discount changes accepted successfully" );
         } else
         {
             await db.restaurant_discounts.update( {
@@ -84,11 +84,11 @@ exports.discountChanges = async ( req, res ) =>
             }, { where: { restaurant_id: restaurant.id } } );
 
             const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id, is_delete: false } } );
-            return getResult( res, 200, discount, "discount changes declined successfully." );
+            return getResult( res, 200, discount, "discount changes declined successfully" );
         }
     } catch ( error )
     {
         console.error( "error in discount changes : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

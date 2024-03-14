@@ -50,22 +50,13 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( `
-                            COALESCE(
-                                SUM(CAST(orders.commission_by_admin AS DECIMAL)) - (SUM(CAST(orders.magic_coupon_amount AS DECIMAL))),
-                                0
-                            )
-                        `),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
+                            0
+                        ),
                         'total_earnings'
                     ]
-                    // [
-                    //     Sequelize.fn(
-                    //         'COALESCE',
-                    //         Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
-                    //         0
-                    //     ),
-                    //     'total_earnings'
-                    // ]
                 ],
                 where: {
                     createdAt: {
@@ -96,22 +87,13 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( `
-                            COALESCE(
-                                SUM(CAST(orders.commission_by_admin AS DECIMAL)) - (SUM(CAST(orders.magic_coupon_amount AS DECIMAL))),
-                                0
-                            )
-                        `),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
+                            0
+                        ),
                         'total_earnings'
                     ]
-                    // [
-                    //     Sequelize.fn(
-                    //         'COALESCE',
-                    //         Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
-                    //         0
-                    //     ),
-                    //     'total_earnings'
-                    // ]
                 ],
                 where: {
                     createdAt: {
@@ -141,22 +123,13 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( `
-                            COALESCE(
-                                SUM(CAST(orders.commission_by_admin AS DECIMAL)) - (SUM(CAST(orders.magic_coupon_amount AS DECIMAL))),
-                                0
-                            )
-                        `),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
+                            0
+                        ),
                         'total_earnings'
                     ]
-                    // [
-                    //     Sequelize.fn(
-                    //         'COALESCE',
-                    //         Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
-                    //         0
-                    //     ),
-                    //     'total_earnings'
-                    // ]
                 ],
                 where: {
                     createdAt: {
@@ -173,22 +146,13 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
                 attributes: [
                     [ Sequelize.fn( 'DATE', Sequelize.col( 'orders.createdAt' ) ), 'date' ],
                     [
-                        Sequelize.literal( `
-                            COALESCE(
-                                SUM(CAST(orders.commission_by_admin AS DECIMAL)) - (SUM(CAST(orders.magic_coupon_amount AS DECIMAL))),
-                                0
-                            )
-                        `),
+                        Sequelize.fn(
+                            'COALESCE',
+                            Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
+                            0
+                        ),
                         'total_earnings'
                     ]
-                    // [
-                    //     Sequelize.fn(
-                    //         'COALESCE',
-                    //         Sequelize.fn( 'SUM', Sequelize.col( 'orders.commission_by_admin' ) ),
-                    //         0
-                    //     ),
-                    //     'total_earnings'
-                    // ]
                 ],
                 where: {
                     createdAt: {
@@ -218,11 +182,11 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
             total_earnings: await totalEarnings(),
             earnings: resultArray
         };
-        return getResult( res, 200, data, "total earnings fetched successfully." );
+        return getResult( res, 200, data, "total earnings fetched successfully" );
     } catch ( error )
     {
         console.error( "error in total earnings with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -231,22 +195,13 @@ async function totalEarnings ()
     const result = await db.orders.findAll( {
         attributes: [
             [
-                Sequelize.literal( `
-                COALESCE(
-                    SUM(CAST(orders.commission_by_admin AS DECIMAL)) - (SUM(CAST(orders.magic_coupon_amount AS DECIMAL))),
+                Sequelize.fn(
+                    'COALESCE',
+                    Sequelize.fn( 'SUM', Sequelize.col( 'commission_by_admin' ) ),
                     0
-                )
-            `),
+                ),
                 'total_earnings'
-            ]
-            // [
-            //     Sequelize.fn(
-            //         'COALESCE',
-            //         Sequelize.fn( 'SUM', Sequelize.col( 'commission_by_admin' ) ),
-            //         0
-            //     ),
-            //     'total_earnings'
-            // ],
+            ],
         ],
     } );
 

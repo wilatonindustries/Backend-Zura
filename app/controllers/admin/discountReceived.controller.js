@@ -100,11 +100,11 @@ exports.totalDiscountReceivedWithFilter = async ( req, res ) =>
             total_discount_received,
             discount_received: resultArray
         };
-        return getResult( res, 200, data, "total discount received  successfully." );
+        return getResult( res, 200, data, "total discount received  successfully" );
     } catch ( error )
     {
         console.error( "error in total discount received with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

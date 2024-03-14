@@ -39,10 +39,10 @@ exports.sendCode = async ( req, res ) =>
 
           if ( createCode )
           {
-            return getResult( res, 200, 1, "code sent successfully." );
+            return getResult( res, 200, 1, "Code sent successfully" );
           } else
           {
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
           }
         }
         else
@@ -59,10 +59,10 @@ exports.sendCode = async ( req, res ) =>
 
           if ( updateCode )
           {
-            return getResult( res, 200, 1, "code sent successfully." );
+            return getResult( res, 200, 1, "Code sent successfully" );
           } else
           {
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
           }
         }
       } else
@@ -79,20 +79,20 @@ exports.sendCode = async ( req, res ) =>
 
         if ( createCode )
         {
-          return getResult( res, 200, 1, "code sent successfully." );
+          return getResult( res, 200, 1, "Code sent successfully" );
         } else
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
+          return getErrorResult( res, 500, 'Somthing went wrong' );
         }
       }
     } else
     {
-      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
     }
   } catch ( error )
   {
     console.error( "error in send code : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    return getErrorResult( res, 500, 'Somthing went wrong' );
   };
 };
 
@@ -130,10 +130,10 @@ exports.resendCode = async ( req, res ) =>
 
           if ( createCode )
           {
-            return getResult( res, 200, 1, "code sent successfully." );
+            return getResult( res, 200, 1, "Code sent successfully" );
           } else
           {
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
           }
         } else
         {
@@ -149,10 +149,10 @@ exports.resendCode = async ( req, res ) =>
 
           if ( updateCode )
           {
-            return getResult( res, 200, 1, "code sent successfully." );
+            return getResult( res, 200, 1, "Code sent successfully" );
           } else
           {
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
           }
         }
       } else
@@ -169,20 +169,20 @@ exports.resendCode = async ( req, res ) =>
 
         if ( createCode )
         {
-          return getResult( res, 200, 1, "code sent successfully." );
+          return getResult( res, 200, 1, "Code sent successfully" );
         } else
         {
-          return getErrorResult( res, 500, 'somthing went wrong.' );
+          return getErrorResult( res, 500, 'Somthing went wrong' );
         }
       }
     } else
     {
-      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+      return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
     }
   } catch ( error )
   {
     console.error( "error in resend code : ", error );
-    return res.status( 500 ).json( { message: 'somthing went wrong' } );
+    return res.status( 500 ).json( { message: 'Somthing went wrong' } );
   };
 };
 
@@ -200,7 +200,7 @@ exports.loginViaOtp = async ( req, res ) =>
   {
     if ( !verficationCode )
     {
-      return getErrorResult( res, 400, 'Invalid verification code.' );
+      return getErrorResult( res, 400, 'Invalid verification code' );
     } else
     {
       var date = new Date();
@@ -218,7 +218,7 @@ exports.loginViaOtp = async ( req, res ) =>
           const result = {
             is_verified: false
           };
-          return getResult( res, 200, result, "Owner not verified, please wait for approval." );
+          return getResult( res, 200, result, "Owner not verified, please wait for approval" );
         }
 
         const restaurant = await db.restaurants.findOne( { where: { user_id: user.id } } );
@@ -235,16 +235,16 @@ exports.loginViaOtp = async ( req, res ) =>
           restaurant_name: restaurant?.store_name || null,
           store_number: restaurant?.store_number || null
         };
-        return getResult( res, 200, result, "mobile verified successfully." );
+        return getResult( res, 200, result, "Mobile verified successfully" );
       } else
       {
-        return getErrorResult( res, 400, 'Invalid verification code.' );
+        return getErrorResult( res, 400, 'Invalid verification code' );
       }
     }
   } ).catch( error =>
   {
     console.error( "error in verify code : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    return getErrorResult( res, 500, 'Somthing went wrong' );
   } );
 };
 
@@ -260,7 +260,7 @@ exports.updateProfile = async ( req, res ) =>
 
     if ( !userAuth )
     {
-      return getErrorResult( res, 404, 'not found.' );
+      return getErrorResult( res, 404, 'not found' );
     }
 
     if ( userAuth.email === null )
@@ -277,7 +277,7 @@ exports.updateProfile = async ( req, res ) =>
         } );
       if ( !updateUser )
       {
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
       }
     } else
     {
@@ -293,15 +293,15 @@ exports.updateProfile = async ( req, res ) =>
         } );
       if ( !updateUser )
       {
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
       }
     }
 
-    return getResult( res, 200, 1, "profile updated successfully." );
+    return getResult( res, 200, 1, "Profile updated successfully" );
   } catch ( error )
   {
     console.error( "error in update profile : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    return getErrorResult( res, 500, 'Somthing went wrong' );
   };
 };
 
@@ -318,7 +318,7 @@ exports.socialLogin = async ( req, res ) =>
     let accessToken = null;
     if ( !user )
     {
-      return getErrorResult( res, 400, 'Invalid credential.' );
+      return getErrorResult( res, 400, 'Invalid credential' );
     } else
     {
       await db.user.update( {
@@ -341,12 +341,12 @@ exports.socialLogin = async ( req, res ) =>
         restaurant_name: restaurant?.store_name || null,
         store_number: restaurant?.store_number || null
       };
-      return getResult( res, 200, resultnew, "user social login successfully." );
+      return getResult( res, 200, resultnew, "User social login successfully" );
     }
   } catch ( error )
   {
     console.error( "error in social login : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    return getErrorResult( res, 500, 'Somthing went wrong' );
   };
 };
 
@@ -356,10 +356,10 @@ exports.dataEncrypt = async ( req, res ) =>
   {
     const email = req.body.email;
     const encryptedData = await encryptData( JSON.stringify( email ) );
-    return getResult( res, 200, encryptedData, "data encrypted successfully." );
+    return getResult( res, 200, encryptedData, "Data encrypted successfully" );
   } catch ( error )
   {
     console.error( "error in data encrypt : ", error );
-    return getErrorResult( res, 500, 'somthing went wrong.' );
+    return getErrorResult( res, 500, 'Somthing went wrong' );
   };
 };

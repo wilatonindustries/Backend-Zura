@@ -45,13 +45,13 @@ exports.billAnalysis = async ( req, res ) =>
 
         } else
         {
-            return getErrorResult( res, 400, "store id and filter are require." );
+            return getErrorResult( res, 400, "Store id and filter are require" );
         }
-        return getResult( res, 200, bill_analysis, "bill analysis fetched successfully." );
+        return getResult( res, 200, bill_analysis, "Bill analysis fetched successfully" );
     } catch ( error )
     {
         console.error( "error in bill analysis with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -74,10 +74,10 @@ exports.countBillAnalysis = async ( req, res ) =>
 
         const total_bill_analysis = parseFloat( result[ 0 ].dataValues.total_bill_analysis );
 
-        return getResult( res, 200, { total_bill_analysis: total_bill_analysis }, "total bill analysis fetched successfully." );
+        return getResult( res, 200, { total_bill_analysis: total_bill_analysis }, "Total bill analysis fetched successfully" );
     } catch ( error )
     {
         console.error( "error in count bill analysis : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

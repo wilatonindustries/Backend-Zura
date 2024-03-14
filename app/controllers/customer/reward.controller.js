@@ -42,10 +42,10 @@ exports.reward = async ( req, res ) =>
 
         const data = { my_rewards: rewardList, total_discount: totalDiscount };
 
-        return getResult( res, 200, data, "customer's reward fetched successfully." );
+        return getResult( res, 200, data, "Customer's reward fetched successfully" );
     } catch ( error )
     {
         console.error( "error in customer reward : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

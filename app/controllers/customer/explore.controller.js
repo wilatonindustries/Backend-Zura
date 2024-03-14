@@ -88,11 +88,11 @@ exports.restaurantList = async ( req, res ) =>
             restaurants: formattedRestaurants
         };
 
-        return getResult( res, 200, data, "restaurant list fetched successfully." );
+        return getResult( res, 200, data, "Restaurant list fetched successfully" );
     } catch ( error )
     {
         console.error( "error in search restaurants : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -111,7 +111,7 @@ exports.getRestaurantDetailsById = async ( req, res ) =>
         } );
         if ( !restaurant )
         {
-            return getResult( res, 200, [], "restaurant details fetched successfully." );
+            return getResult( res, 200, [], "Restaurant details fetched successfully" );
 
         }
         const discounts = restaurant.discounts;
@@ -124,10 +124,10 @@ exports.getRestaurantDetailsById = async ( req, res ) =>
             restaurant
         };
 
-        return getResult( res, 200, data, "restaurant details fetched successfully." );
+        return getResult( res, 200, data, "Restaurant details fetched successfully" );
     } catch ( err )
     {
         console.error( "err in fetch restaurants details : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 };

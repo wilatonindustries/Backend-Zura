@@ -12,11 +12,11 @@ exports.orderBodyEncrypt = async ( req, res ) =>
         const { customer_id, restaurant_id, bill_amount, order_timing, discount, coupon_id } = req.body;
         const data = { customer_id, restaurant_id, bill_amount, order_timing, discount, coupon_id };
         const encryptedData = await encryptData( JSON.stringify( data ) );
-        return getResult( res, 200, encryptedData, "payment's body encrypted successfully." );
+        return getResult( res, 200, encryptedData, "Payment's body encrypted successfully" );
     } catch ( error )
     {
         console.error( "error in payment body data encrypt : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 
 };
@@ -39,13 +39,13 @@ exports.paymentOrderSummery = async ( req, res ) =>
 
         if ( !customer )
         {
-            return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
+            return getErrorResult( res, 404, `Customer not found with customer id ${ customer_id }` );
         }
 
         const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
-            return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
+            return getErrorResult( res, 404, `Restaurant not found with restaurant id ${ restaurant_id }` );
         }
 
         const convinenceFee = await db.configurations.findOne( { where: { type: 'convinence_fee' }, attributes: [ 'value' ] } );
@@ -60,7 +60,7 @@ exports.paymentOrderSummery = async ( req, res ) =>
 
             if ( !coupons )
             {
-                return getErrorResult( res, 404, `coupons not found with coupon id ${ coupon_id }` );
+                return getErrorResult( res, 404, `Coupons not found with coupon id ${ coupon_id }` );
             }
             coupon_discount = parseFloat( coupons.discount );
         }
@@ -78,7 +78,8 @@ exports.paymentOrderSummery = async ( req, res ) =>
         const createPayment = await db.payment_orders.create( {
             customer_id: customer_id,
             restaurant_id: restaurant_id,
-            bill_amount: payAmt,
+            bill_amount: bill_amount,
+            pay_amount: payAmt,
             discount: discount,
             coupon_id: coupon_id ? coupon_id : null,
             order_timing: order_timing,
@@ -86,7 +87,7 @@ exports.paymentOrderSummery = async ( req, res ) =>
         } );
 
         const responseData = {
-            bill_amount: createPayment?.bill_amount,
+            bill_amount: bill_amount,
             convenience_fee,
             discount: createPayment?.discount,
             magic_coupon_discount: coupon_discount,
@@ -96,11 +97,11 @@ exports.paymentOrderSummery = async ( req, res ) =>
             payment_order_id: createPayment?.order_id
         };
 
-        return getResult( res, 200, responseData, "payment order created successfully." );
+        return getResult( res, 200, responseData, "Payment order created successfully" );
     } catch ( error )
     {
         console.error( "error in payment summary : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -111,7 +112,7 @@ exports.autoPayout = async () =>
         await db.orders.update( { is_paid: true }, {
             where: { is_paid: false }
         } );
-        console.log( 'Automatic payout done.' );
+        console.log( 'Automatic payout done' );
     } catch ( error )
     {
         console.error( "error in auto payment : ", error );

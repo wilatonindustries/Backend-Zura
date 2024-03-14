@@ -66,11 +66,11 @@ exports.totalEarningsWithFilter = async ( req, res ) =>
             )
         } ) );
 
-        return getResult( res, 200, resultArray, "total earnings fetched successfully." );
+        return getResult( res, 200, resultArray, "Total earnings fetched successfully");
     } catch ( error )
     {
         console.error( "error in fetch total earnings with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

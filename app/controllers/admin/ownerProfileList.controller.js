@@ -228,11 +228,11 @@ exports.getOwnerProfileListWithFilter = async ( req, res ) =>
             owner_profile_list: ownerProfileList,
             owner_request_list: ownerRequestList
         };
-        return getResult( res, 200, data, "owner profile list fetched successfully." );
+        return getResult( res, 200, data, "owner profile list fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch owner profile list : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -265,11 +265,11 @@ exports.ownerRemove = async ( req, res ) =>
             where: { user_id: id },
         } );
 
-        return getResult( res, 200, removeOwner, "owner removed successfully." );
+        return getResult( res, 200, removeOwner, "owner removed successfully" );
     } catch ( error )
     {
         console.error( "error in owner remove : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -297,13 +297,13 @@ exports.ownerRequest = async ( req, res ) =>
                 {
                     if ( owner_mobile.length !== 10 )
                     {
-                        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+                        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
                     }
                     const user = await db.user.findOne( { where: { owner_mobile: owner_mobile } } );
 
                     if ( user )
                     {
-                        return getErrorResult( res, 403, 'already exists .' );
+                        return getErrorResult( res, 403, 'already exists ' );
                     }
                     updatedValue.owner_mobile = owner_mobile;
                 }
@@ -338,18 +338,18 @@ exports.ownerRequest = async ( req, res ) =>
                     discount_json: JSON.stringify( discount ),
                 } );
 
-                return getResult( res, 200, acceptedOwner, "owner's request accepted successfully." );
+                return getResult( res, 200, acceptedOwner, "owner's request accepted successfully" );
             } else
             {
                 await db.user_verification_codes.destroy( { where: { user_id: id } } );
                 const declineOwner = await db.user.destroy( { where: { id: id } } );
 
-                return getResult( res, 200, declineOwner, "owner's request declined successfully." );
+                return getResult( res, 200, declineOwner, "owner's request declined successfully" );
             }
         }
     } catch ( error )
     {
         console.error( "error in owner's request : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

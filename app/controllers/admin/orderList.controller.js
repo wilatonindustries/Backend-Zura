@@ -46,13 +46,16 @@ exports.orderList = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'discount_given', 'order_timing', 'commission_by_admin', "magic_coupon_discount" ],
+                order: [ [ 'createdAt', 'DESC' ] ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
                 const customer = order.customer;
+
+                const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
                 orderlist.push( {
                     store_name: store ? store.store_name : '',
@@ -61,10 +64,10 @@ exports.orderList = async ( req, res ) =>
                     transaction_id: order.transaction_id,
                     bill_amount: parseFloat( order.bill_amount ),
                     gst: parseFloat( order.gst_rate ),
-                    discount_to_customer: parseFloat( order.discount_to_customer ),
-                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    discount_to_customer: discount,
+                    discount_given_by_customer: parseFloat( order.discount_given ),
                     order_timing: order.order_timing,
-                    our_profit: parseFloat( order.gst_amt )
+                    our_profit: parseFloat( order.commission_by_admin )
                 } );
             } );
         } else if ( customer_name )
@@ -95,13 +98,16 @@ exports.orderList = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'discount_given', 'order_timing', 'commission_by_admin', "magic_coupon_discount" ],
+                order: [ [ 'createdAt', 'DESC' ] ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
                 const customer = order.customer;
+
+                const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
                 orderlist.push( {
                     store_name: store ? store.store_name : '',
@@ -110,10 +116,10 @@ exports.orderList = async ( req, res ) =>
                     transaction_id: order.transaction_id,
                     bill_amount: parseFloat( order.bill_amount ),
                     gst: parseFloat( order.gst_rate ),
-                    discount_to_customer: parseFloat( order.discount_to_customer ),
-                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    discount_to_customer: discount,
+                    discount_given_by_customer: parseFloat( order.discount_given ),
                     order_timing: order.order_timing,
-                    our_profit: parseFloat( order.gst_amt )
+                    our_profit: parseFloat( order.commission_by_admin )
                 } );
             } );
         } else if ( store_name )
@@ -144,13 +150,16 @@ exports.orderList = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'discount_given', 'order_timing', 'commission_by_admin', "magic_coupon_discount" ],
+                order: [ [ 'createdAt', 'DESC' ] ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
                 const customer = order.customer;
+
+                const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
                 orderlist.push( {
                     store_name: store ? store.store_name : '',
@@ -159,10 +168,10 @@ exports.orderList = async ( req, res ) =>
                     transaction_id: order.transaction_id,
                     bill_amount: parseFloat( order.bill_amount ),
                     gst: parseFloat( order.gst_rate ),
-                    discount_to_customer: parseFloat( order.discount_to_customer ),
-                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    discount_to_customer: discount,
+                    discount_given_by_customer: parseFloat( order.discount_given ),
                     order_timing: order.order_timing,
-                    our_profit: parseFloat( order.gst_amt )
+                    our_profit: parseFloat( order.commission_by_admin )
                 } );
             } );
         } else
@@ -188,13 +197,16 @@ exports.orderList = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'dis_to_customer', 'order_timing', 'gst_amt' ]
+                attributes: [ 'customer_id', 'order_date', 'createdAt', 'transaction_id', 'bill_amount', 'gst_rate', 'discount_to_customer', 'discount_given', 'order_timing', 'commission_by_admin', "magic_coupon_discount" ],
+                order: [ [ 'createdAt', 'DESC' ] ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
                 const customer = order.customer;
+
+                const discount = parseFloat( order.discount_to_customer ) + parseFloat( order.magic_coupon_discount );
 
                 orderlist.push( {
                     store_name: store ? store.store_name : '',
@@ -203,10 +215,10 @@ exports.orderList = async ( req, res ) =>
                     transaction_id: order.transaction_id,
                     bill_amount: parseFloat( order.bill_amount ),
                     gst: parseFloat( order.gst_rate ),
-                    discount_to_customer: parseFloat( order.discount_to_customer ),
-                    discount_given_by_customer: parseFloat( order.dis_to_customer ),
+                    discount_to_customer: discount,
+                    discount_given_by_customer: parseFloat( order.discount_given ),
                     order_timing: order.order_timing,
-                    our_profit: parseFloat( order.gst_amt )
+                    our_profit: parseFloat( order.commission_by_admin )
                 } );
             } );
         }
@@ -216,10 +228,10 @@ exports.orderList = async ( req, res ) =>
             orders_list: orderlist
         };
 
-        return getResult( res, 200, data, "order list  fetched successfully." );
+        return getResult( res, 200, data, "order list  fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch order list and counted : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

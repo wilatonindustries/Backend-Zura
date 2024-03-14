@@ -41,11 +41,11 @@ exports.restaurantList = async ( req, res ) =>
             percentage_owner_req,
             store_list: storeList
         };
-        return getResult( res, 200, data, "store list fetched successfully." );
+        return getResult( res, 200, data, "store list fetched successfully" );
     } catch ( err )
     {
         console.error( "err in fetch store list : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -85,10 +85,10 @@ exports.updateDiscount = async ( req, res ) =>
         }
 
         const discount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id, is_delete: false } } );
-        return getResult( res, 200, discount, "restaurant discount updated successfully." );
+        return getResult( res, 200, discount, "restaurant discount updated successfully" );
     } catch ( err )
     {
         console.error( "err in update restaurant discount : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

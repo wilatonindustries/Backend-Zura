@@ -9,7 +9,7 @@ exports.getCustomerHomePage = async ( req, res ) =>
     {
         const categories = await db.categories.findAll();
         const banners = await db.banners.findAll();
-        const restaurants = await db.restaurants.findAll();
+        const restaurants = await db.restaurants.findAll( { where: { is_delete: false } } );
 
         const data = {
             category_list: categories,
@@ -17,11 +17,11 @@ exports.getCustomerHomePage = async ( req, res ) =>
             saved_till_date: 0,
             restaurant_list: restaurants,
         };
-        return getResult( res, 200, data, "customer home page fetched successfully." );
+        return getResult( res, 200, data, "Customer home page data fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetching customer home page : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -91,7 +91,9 @@ exports.searchRestaurant = async ( req, res ) =>
                 discount: formattedDiscounts,
                 thumbnail_photo: restaurant.profile_photos.set_store_thumbnail_photo,
                 google_link: restaurant.google_link,
-                category_id: restaurant.category_id
+                category_id: restaurant.category_id,
+                latitude: restaurant.latitude,
+                longitude: restaurant.longitude
             };
         } );
 
@@ -154,22 +156,22 @@ exports.searchRestaurant = async ( req, res ) =>
 
         if ( latitude && longitude )
         {
-            const maxDistance = db.configurations.findOne( { where: { type: 'distance' }, attributes: [ 'value' ] } );
+            const maxDistance = await db.configurations.findOne( { where: { type: 'distance' }, attributes: [ 'value' ] } );
             formattedRestaurants = formattedRestaurants.filter( restaurant =>
             {
-                const distance = calculateDistance( latitude, longitude, restaurant.latitude, restaurant.longitude );
-                return distance <= maxDistance;
+                const distance = calculateDistance( latitude, longitude, parseFloat( restaurant.latitude ), parseFloat( restaurant.longitude ) );
+                return distance <= parseFloat( maxDistance.value );
             } );
         }
 
         const data = {
             restaurants: formattedRestaurants
         };
-        return getResult( res, 200, data, "restaurants fetched successfully." );
+        return getResult( res, 200, data, "Restaurants fetched successfully" );
     } catch ( error )
     {
         console.error( "error in search restaurants : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

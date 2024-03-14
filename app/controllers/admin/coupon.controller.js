@@ -18,7 +18,7 @@ exports.createCoupon = async ( req, res ) =>
             const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
             if ( !restaurant )
             {
-                return getErrorResult( res, 404, 'restaurant not found.' );
+                return getErrorResult( res, 404, 'Restaurant not found' );
             }
             createdvalue.restaurant_id = restaurant_id;
         }
@@ -27,7 +27,7 @@ exports.createCoupon = async ( req, res ) =>
             const category = await db.categories.findOne( { where: { id: category_id } } );
             if ( !category )
             {
-                return getErrorResult( res, 404, 'category not found.' );
+                return getErrorResult( res, 404, 'Category not found' );
             }
             createdvalue.category_id = category_id;
         }
@@ -41,11 +41,11 @@ exports.createCoupon = async ( req, res ) =>
             ...createdvalue
         } );
 
-        return getResult( res, 200, createCoupon, "coupon created successfully." );
+        return getResult( res, 200, createCoupon, "Coupon created successfully" );
     } catch ( error )
     {
         console.error( "error in creating coupon  : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -78,11 +78,11 @@ exports.getCouponByCode = async ( req, res ) =>
             } );
         }
 
-        return getResult( res, 200, coupon, "coupons fetched successfully." );
+        return getResult( res, 200, coupon, "Coupons fetched successfully" );
     } catch ( error )
     {
         console.error( "error in get coupon  : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -106,11 +106,11 @@ exports.getCoupons = async ( req, res ) =>
             countCoupon, coupon
         };
 
-        return getResult( res, 200, data, "coupons fetched successfully." );
+        return getResult( res, 200, data, "Coupons fetched successfully" );
     } catch ( error )
     {
         console.error( "error in get coupon  : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -124,14 +124,14 @@ exports.getCouponById = async ( req, res ) =>
 
         if ( !coupon )
         {
-            return getResult( res, 200, [], "coupon fetched successfully." );
+            return getResult( res, 200, [], "Coupon fetched successfully" );
         }
 
-        return getResult( res, 200, coupon, "coupon fetched successfully." );
+        return getResult( res, 200, coupon, "Coupon fetched successfully" );
     } catch ( error )
     {
         console.error( "error in get coupon by id  : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -146,7 +146,7 @@ exports.updateCoupon = async ( req, res ) =>
 
         if ( !coupon )
         {
-            return getErrorResult( res, 404, "coupon not found." );
+            return getErrorResult( res, 404, "Coupon not found" );
         }
         const couponStatus = status === 'inactive' ? 'inactive' : 'active';
 
@@ -157,7 +157,7 @@ exports.updateCoupon = async ( req, res ) =>
             const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id } } );
             if ( !restaurant )
             {
-                return getErrorResult( res, 404, 'restaurant not found.' );
+                return getErrorResult( res, 404, 'Restaurant not found' );
             }
             updateValue.restaurant_id = restaurant_id;
         }
@@ -166,7 +166,7 @@ exports.updateCoupon = async ( req, res ) =>
             const category = await db.categories.findOne( { where: { id: category_id } } );
             if ( !category )
             {
-                return getErrorResult( res, 404, 'category not found.' );
+                return getErrorResult( res, 404, 'Category not found' );
             }
             updateValue.category_id = category_id;
         }
@@ -180,11 +180,11 @@ exports.updateCoupon = async ( req, res ) =>
             ...updateValue
         }, { where: { id } } );
 
-        return getResult( res, 200, updateCoupon, "coupon updated successfully." );
+        return getResult( res, 200, updateCoupon, "Coupon updated successfully" );
     } catch ( error )
     {
         console.error( "error in update coupon : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -195,7 +195,7 @@ exports.deleteCoupon = async ( req, res ) =>
     const coupon = await db.coupons.findOne( { where: { id } } );
     if ( !coupon )
     {
-        return getErrorResult( res, 404, `coupon not found with id ${ id }` );
+        return getErrorResult( res, 404, `Coupon not found with id ${ id }` );
     }
 
     await db.coupons.destroy( {
@@ -203,11 +203,11 @@ exports.deleteCoupon = async ( req, res ) =>
     } )
         .then( data =>
         {
-            return getResult( res, 200, data, "coupon deleted successfully." );
+            return getResult( res, 200, data, "Coupon deleted successfully" );
         } )
         .catch( err =>
         {
             console.error( "err in delete coupon : ", err );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         } );
 };

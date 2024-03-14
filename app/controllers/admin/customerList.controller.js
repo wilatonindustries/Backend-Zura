@@ -100,11 +100,11 @@ exports.customerList = async ( req, res ) =>
             customerlist,
             total_amount: totalAmount
         };
-        return getResult( res, 200, data, "customers list fetched successfully." );
+        return getResult( res, 200, data, "Customers list fetched successfully" );
     } catch ( err )
     {
         console.error( "err in fetch customers list and customer counted : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -119,22 +119,22 @@ exports.blockOrUnblockCustomer = async ( req, res ) =>
 
         if ( !customer )
         {
-            return getErrorResult( res, 400, `customer not found with id ${ id }.` );
+            return getErrorResult( res, 400, `Customer not found with id ${ id }` );
         }
 
         if ( is_active === true )
         {
             await db.customer.update( { is_active }, { where: { id } } );
-            return getResult( res, 200, 1, "customer unblocked successfully." );
+            return getResult( res, 200, 1, "Customer unblocked successfully" );
         } else
         {
             await db.customer.update( { is_active }, { where: { id } } );
-            return getResult( res, 200, 1, "customer blocked successfully." );
+            return getResult( res, 200, 1, "Customer blocked successfully" );
         }
     } catch ( err )
     {
         console.error( "err in customer block or unblock : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -183,14 +183,14 @@ exports.sendNotification = async ( req, res ) =>
             }
 
 
-            return getResult( res, 200, 1, "notification send successfully." );
+            return getResult( res, 200, 1, "Notification send successfully" );
         } else
         {
-            return getResult( res, 200, 1, "notification send successfully." );
+            return getResult( res, 200, 1, "Notification send successfully" );
         }
     } catch ( error )
     {
         console.error( "error in send notification in admin : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

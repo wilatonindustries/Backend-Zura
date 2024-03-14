@@ -7,10 +7,10 @@ exports.getTimingBanners = async ( req, res ) =>
     {
         const timingBanner = await db.timing_banners.findAll();
 
-        return getResult( res, 200, timingBanner ? timingBanner : [], "timing banners fetched successfully." );
+        return getResult( res, 200, timingBanner ? timingBanner : [], "Timing banners fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch timing banners : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

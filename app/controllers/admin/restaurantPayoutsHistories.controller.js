@@ -24,7 +24,7 @@ exports.restaurantPayoutsOrHistories = async ( req, res ) =>
             const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
             if ( !restaurant )
             {
-                return getErrorResult( res, 404, 'restaurant not found.' );
+                return getErrorResult( res, 404, 'restaurant not found' );
             }
 
 
@@ -100,11 +100,11 @@ exports.restaurantPayoutsOrHistories = async ( req, res ) =>
             restaurant_payouts: restaurantPayoutsResponse,
             payouts_histories: payoutsHistoriesResponse
         };
-        return getResult( res, 200, data, "restaurant payouts or histories created successfully." );
+        return getResult( res, 200, data, "restaurant payouts or histories created successfully" );
     } catch ( error )
     {
         console.error( "error in fetch total restaurant payouts : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

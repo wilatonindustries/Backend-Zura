@@ -7,10 +7,10 @@ exports.getStaticComponents = async ( req, res ) =>
     {
         const aboutApp = await db.static_components.findAll( {} );
 
-        return getResult( res, 200, aboutApp ? aboutApp : [], "about app details fetched successfully." );
+        return getResult( res, 200, aboutApp ? aboutApp : [], "About app details fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch about app details : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

@@ -31,6 +31,7 @@ exports.getOrderList = async ( req, res ) =>
                 }
             ],
             attributes: [ 'transaction_id', 'bill_amount', 'createdAt', 'is_paid' ],
+            order: [ [ 'createdAt', 'DESC' ] ]
         };
         if ( sort === 'high_to_low' )
         {
@@ -61,17 +62,17 @@ exports.getOrderList = async ( req, res ) =>
             ordersList.push( {
                 customer_name: customer ? customer.name : '',
                 transaction_id: order.transaction_id,
-                bill_amount: order.bill_amount,
+                bill_amount: JSON.stringify( order.bill_amount ),
                 created_date: order.createdAt,
                 is_paid: order.is_paid,
             } );
         } );
 
         const data = { order_list: ordersList };
-        return getResult( res, 200, data, "order list fetched successfully." );
+        return getResult( res, 200, data, "Order list fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch order list : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

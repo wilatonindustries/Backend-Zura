@@ -29,10 +29,10 @@ exports.loginViaOTP = async ( req, res ) =>
 
                 if ( createCode )
                 {
-                    return getResult( res, 200, 1, "code sent successfully." );
+                    return getResult( res, 200, 1, "Code sent successfully" );
                 } else
                 {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
+                    return getErrorResult( res, 500, 'Somthing went wrong' );
                 }
             } else
             {
@@ -48,20 +48,20 @@ exports.loginViaOTP = async ( req, res ) =>
 
                 if ( updateCode )
                 {
-                    return getResult( res, 200, 1, "code sent successfully." );
+                    return getResult( res, 200, 1, "Code sent successfully" );
                 } else
                 {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
+                    return getErrorResult( res, 500, 'Somthing went wrong' );
                 }
             }
         } catch ( error )
         {
             console.error( "error in send customer code : ", error );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         };
     } else
     {
-        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
     }
 };
 
@@ -92,10 +92,10 @@ exports.resendCode = async ( req, res ) =>
 
                 if ( createCode )
                 {
-                    return getResult( res, 200, 1, "code sent successfully." );
+                    return getResult( res, 200, 1, "Code sent successfully" );
                 } else
                 {
-                    return getResult( res, 200, 1, "code sent successfully." );
+                    return getResult( res, 200, 1, "Code sent successfully" );
                 }
             } else
             {
@@ -111,20 +111,20 @@ exports.resendCode = async ( req, res ) =>
 
                 if ( updateCode )
                 {
-                    return getResult( res, 200, 1, "code sent successfully." );
+                    return getResult( res, 200, 1, "Code sent successfully" );
                 } else
                 {
-                    return getErrorResult( res, 500, 'somthing went wrong.' );
+                    return getErrorResult( res, 500, 'Somthing went wrong' );
                 }
             }
         } catch ( error )
         {
             console.error( "error in resend customer code : ", error );
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         };
     } else
     {
-        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits.' );
+        return getErrorResult( res, 400, 'Mobile number must be exactly 10 digits' );
     }
 };
 
@@ -142,7 +142,7 @@ exports.verifyCode = async ( req, res ) =>
     {
         if ( !verficationCode )
         {
-            return getErrorResult( res, 400, 'Invalid verification code.' );
+            return getErrorResult( res, 400, 'Invalid verification code' );
         } else
         {
             var date = new Date();
@@ -178,11 +178,11 @@ exports.verifyCode = async ( req, res ) =>
                         email: createCustomer?.email || null,
                         is_notified: createCustomer?.is_notified
                     };
-                    return getResult( res, 200, result, "mobile verified successfully." );
+                    return getResult( res, 200, result, "Mobile verified successfully" );
                 }
                 if ( customer.is_active === false )
                 {
-                    return getErrorResult( res, 400, 'customer blocked.' );
+                    return getErrorResult( res, 400, 'Customer blocked' );
                 }
                 accessToken = generateJwtToken( customer );
 
@@ -205,16 +205,16 @@ exports.verifyCode = async ( req, res ) =>
                     email: customer.email || null,
                     is_notified: customer.is_notified
                 };
-                return getResult( res, 200, result, "mobile verified successfully." );
+                return getResult( res, 200, result, "Mobile verified successfully" );
             } else
             {
-                return getErrorResult( res, 400, 'Invalid verification code.' );
+                return getErrorResult( res, 400, 'Invalid verification code' );
             }
         }
     } ).catch( error =>
     {
         console.error( "error in verify customer code : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     } );
 };
 
@@ -231,12 +231,12 @@ exports.updateProfile = async ( req, res ) =>
 
         if ( !customerAuth )
         {
-            return getErrorResult( res, 404, 'not found.' );
+            return getErrorResult( res, 404, 'Not found' );
         }
 
         if ( customerAuth.is_active === false )
         {
-            return getErrorResult( res, 400, 'customer blocked.' );
+            return getErrorResult( res, 400, 'Customer blocked' );
         }
 
         if ( area_name ) { updateDetails.area_name = area_name; }
@@ -251,7 +251,7 @@ exports.updateProfile = async ( req, res ) =>
 
             if ( customer )
             {
-                return getErrorResult( res, 403, 'already exists .' );
+                return getErrorResult( res, 403, 'Already exists ' );
             }
             updatedValue.email = customerAuth.email === null ? email : customerAuth.email;
         }
@@ -262,7 +262,7 @@ exports.updateProfile = async ( req, res ) =>
 
             if ( customer )
             {
-                return getErrorResult( res, 403, 'already exists .' );
+                return getErrorResult( res, 403, 'Already exists ' );
             }
             updatedValue.mobile = customerAuth.mobile === null ? mobile : customerAuth.mobile;
         }
@@ -273,7 +273,7 @@ exports.updateProfile = async ( req, res ) =>
 
         if ( !updateCustomer || !updateCustomerDetail )
         {
-            return getErrorResult( res, 500, 'somthing went wrong.' );
+            return getErrorResult( res, 500, 'Somthing went wrong' );
         }
         await db.customer.update( {
             is_profile_updated: true,
@@ -282,11 +282,11 @@ exports.updateProfile = async ( req, res ) =>
                 where: { id: customerId }
             } );
 
-        return getResult( res, 200, 1, "profile updated successfully." );
+        return getResult( res, 200, 1, "Profile updated successfully" );
     } catch ( error )
     {
         console.error( "error in update customer profile : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 };
 
@@ -329,7 +329,7 @@ exports.socialLogin = async ( req, res ) =>
                 is_social: customer.is_social,
                 is_notified: customer.is_notified
             };
-            return getResult( res, 200, resultnew, "customer social login successfully." );
+            return getResult( res, 200, resultnew, "Customer social login successfully" );
         } else
         {
             const createCustomer = await db.customer.create( {
@@ -354,12 +354,12 @@ exports.socialLogin = async ( req, res ) =>
                 is_social: createCustomer.is_social,
                 is_notified: createCustomer?.is_notified
             };
-            return getResult( res, 200, resultnew, "customer social login successfully." );
+            return getResult( res, 200, resultnew, "Customer social login successfully" );
         }
     } catch ( error )
     {
         console.error( "error in customer social login : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 };
 
@@ -369,11 +369,11 @@ exports.dataEncrypt = async ( req, res ) =>
     {
         const email = req.body.email;
         const encryptedData = await encryptData( JSON.stringify( email ) );
-        return getResult( res, 200, encryptedData, "data encrypted successfully." );
+        return getResult( res, 200, encryptedData, "data encrypted successfully" );
     } catch ( error )
     {
         console.error( "error in customer data encrypt : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 
 };
@@ -389,15 +389,15 @@ exports.manageDeviceToken = async ( req, res ) =>
 
         if ( !customer )
         {
-            return getErrorResult( res, 404, `customer not found.` );
+            return getErrorResult( res, 404, `Customer not found.` );
         }
 
         await db.customer.update( { fcm_token: token }, { where: { id: customerId } } );
-        return getResult( res, 200, 1, "device token managed successfully." );
+        return getResult( res, 200, 1, "Device token managed successfully" );
     } catch ( error )
     {
         console.error( "error in manage device token : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 
 };

@@ -7,11 +7,11 @@ exports.getSocialMedias = async ( req, res ) =>
     {
         const socialMedia = await db.social_medias.findAll( {} );
 
-        return getResult( res, 200, socialMedia ? socialMedia : [], "social media's details fetched successfully." );
+        return getResult( res, 200, socialMedia ? socialMedia : [], "social media's details fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch social media's details : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -26,7 +26,7 @@ exports.updateSocialMedias = async ( req, res ) =>
 
         if ( !socialMedia )
         {
-            return getErrorResult( res, 404, 'not found.' );
+            return getErrorResult( res, 404, 'not found' );
         }
 
         let updatedValue = {};
@@ -37,10 +37,10 @@ exports.updateSocialMedias = async ( req, res ) =>
 
         await db.social_medias.update( updatedValue, { where: { id: id } } );
 
-        return getResult( res, 200, 1, "social media's details updated successfully." );
+        return getResult( res, 200, 1, "social media's details updated successfully" );
     } catch ( error )
     {
         console.error( "error in update social media's details : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

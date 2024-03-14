@@ -13,7 +13,7 @@ exports.addProfilePhoto = async ( req, res ) =>
         const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
-            return getErrorResult( res, 404, 'restaurant not found.' );
+            return getErrorResult( res, 404, 'restaurant not found' );
         }
 
         const profile = await db.restaurant_profile_photos.findOne( {
@@ -76,7 +76,7 @@ exports.addProfilePhoto = async ( req, res ) =>
     } catch ( error )
     {
         console.error( "error in add profile photo : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

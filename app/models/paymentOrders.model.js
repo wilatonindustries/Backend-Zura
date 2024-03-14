@@ -24,7 +24,7 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 references: { model: 'restaurants', key: 'id' }
             },
             bill_amount: {
-                type: DataTypes.DECIMAL,
+                type: DataTypes.FLOAT( 10, 2 ),
                 allowNull: true,
                 field: 'bill_amount',
                 defaultValue: 0.00
@@ -50,6 +50,12 @@ module.exports = ( sequelize, Sequelize, DataTypes ) =>
                 type: DataTypes.STRING,
                 allowNull: true,
                 field: 'order_timing'
+            },
+            pay_amount: {
+                type: DataTypes.FLOAT( 10, 2 ),
+                allowNull: true,
+                field: 'pay_amount',
+                defaultValue: 0.00
             },
         },
         {

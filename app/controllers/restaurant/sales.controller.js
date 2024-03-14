@@ -66,10 +66,10 @@ exports.totalSalesWithFilter = async ( req, res ) =>
             )
         } ) );
 
-        return getResult( res, 200, resultArray, "total sales fetched successfully." );
+        return getResult( res, 200, resultArray, "Total sales fetched successfully" );
     } catch ( error )
     {
         console.error( "error in total sales with filter : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };

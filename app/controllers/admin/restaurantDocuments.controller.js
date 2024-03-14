@@ -13,7 +13,7 @@ exports.addDocument = async ( req, res ) =>
         const restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
         if ( !restaurant )
         {
-            return getErrorResult( res, 404, 'restaurant not found.' );
+            return getErrorResult( res, 404, 'restaurant not found' );
         }
 
         const document = await db.restaurant_documents.findOne( {
@@ -74,7 +74,7 @@ exports.addDocument = async ( req, res ) =>
     } catch ( error )
     {
         console.error( `error in add document : `, error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 

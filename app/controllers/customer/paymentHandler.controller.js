@@ -24,7 +24,7 @@ exports.paymentHandler = async ( req, res ) =>
 
             if ( !paymentOrder )
             {
-                return getErrorResult( res, 404, `payment order not found with order id ${ payment_order_id } ` );
+                return getErrorResult( res, 404, `Payment order not found with order id ${ payment_order_id } ` );
             }
             paymentOrderId = paymentOrder.id;
             // customer_id = paymentOrder.customer_id;
@@ -43,13 +43,13 @@ exports.paymentHandler = async ( req, res ) =>
 
             if ( !customer )
             {
-                return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
+                return getErrorResult( res, 404, `Customer not found with customer id ${ customer_id }` );
             }
 
             restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
             if ( !restaurant )
             {
-                return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
+                return getErrorResult( res, 404, `Restaurant not found with restaurant id ${ restaurant_id }` );
             }
 
             restaurantDiscount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
@@ -73,8 +73,8 @@ exports.paymentHandler = async ( req, res ) =>
                 discount_commision = filteredDiscount.discount_commission;
             } else
             {
-                console.error( 'Order is NOT within discount time range.' );
-                return getErrorResult( res, 500, 'Something went wrong.' );
+                console.error( 'Order is NOT within discount time range' );
+                return getErrorResult( res, 500, 'Something went wrong' );
             }
 
             coupons = await db.coupons.findOne( {
@@ -93,7 +93,6 @@ exports.paymentHandler = async ( req, res ) =>
 
             convenienceRate = bill_amount * convin_fee / 100;
             dis_to_customer = ( bill_amount * discount / 100 );
-            dis_by_res = bill_amount * discount_from_restaurant / 100;
             com_by_admin = ( bill_amount * discount_commision / 100 ) + convenienceRate;
             gstRate = com_by_admin * gstDis / 100;
             gstAmt = com_by_admin + gstRate;
@@ -101,8 +100,11 @@ exports.paymentHandler = async ( req, res ) =>
             magic_coupon_amount = bill_amount * coupon_discount / 100;
 
             discountGiven = dis_to_customer + magic_coupon_amount;
+
+            dis_by_res = ( bill_amount * discount_commision / 100 ) + discountGiven;
+
             pay_by_customer = ( bill_amount - discountGiven ) + convenienceRate;
-            givenToRes = pay_by_customer - com_by_admin - gstRate - magic_coupon_amount;
+            givenToRes = pay_by_customer - com_by_admin - gstRate;
 
             data = await db.orders.create( {
                 user_id: restaurant.user_id,
@@ -137,7 +139,7 @@ exports.paymentHandler = async ( req, res ) =>
 
             if ( !paymentOrder )
             {
-                return getErrorResult( res, 404, `payment order not found with order id ${ payment_order_id } ` );
+                return getErrorResult( res, 404, `Payment order not found with order id ${ payment_order_id } ` );
             }
             paymentOrderId = paymentOrder.id;
             // customer_id = paymentOrder.customer_id;
@@ -156,13 +158,13 @@ exports.paymentHandler = async ( req, res ) =>
 
             if ( !customer )
             {
-                return getErrorResult( res, 404, `customer not found with customer id ${ customer_id }` );
+                return getErrorResult( res, 404, `Customer not found with customer id ${ customer_id }` );
             }
 
             restaurant = await db.restaurants.findOne( { where: { id: restaurant_id, is_delete: false } } );
             if ( !restaurant )
             {
-                return getErrorResult( res, 404, `restaurant not found with restaurant id ${ restaurant_id }` );
+                return getErrorResult( res, 404, `Restaurant not found with restaurant id ${ restaurant_id }` );
             }
 
             restaurantDiscount = await db.restaurant_discounts.findOne( { where: { restaurant_id: restaurant.id } } );
@@ -186,8 +188,8 @@ exports.paymentHandler = async ( req, res ) =>
                 discount_commision = filteredDiscount.discount_commission;
             } else
             {
-                console.error( 'Order is NOT within discount time range.' );
-                return getErrorResult( res, 500, 'Something went wrong.' );
+                console.error( 'Order is NOT within discount time range' );
+                return getErrorResult( res, 500, 'Something went wrong' );
             }
 
             coupons = await db.coupons.findOne( {
@@ -206,7 +208,7 @@ exports.paymentHandler = async ( req, res ) =>
 
             convenienceRate = bill_amount * convin_fee / 100;
             dis_to_customer = ( bill_amount * discount / 100 );
-            dis_by_res = bill_amount * discount_from_restaurant / 100;
+
             com_by_admin = ( bill_amount * discount_commision / 100 ) + convenienceRate;
             gstRate = com_by_admin * gstDis / 100;
             gstAmt = com_by_admin + gstRate;
@@ -214,8 +216,11 @@ exports.paymentHandler = async ( req, res ) =>
             magic_coupon_amount = bill_amount * coupon_discount / 100;
 
             discountGiven = dis_to_customer + magic_coupon_amount;
+
+            dis_by_res = ( bill_amount * discount_commision / 100 ) + discountGiven;
+
             pay_by_customer = ( bill_amount - discountGiven ) + convenienceRate;
-            givenToRes = pay_by_customer - com_by_admin - gstRate - magic_coupon_amount;
+            givenToRes = pay_by_customer - com_by_admin - gstRate;
 
             data = await db.orders.create( {
                 user_id: restaurant.user_id,
@@ -244,13 +249,13 @@ exports.paymentHandler = async ( req, res ) =>
             } );
         } else
         {
-            return getErrorResult( res, 404, 'invalid type.' );
+            return getErrorResult( res, 404, 'Invalid type' );
         }
 
-        return getResult( res, 200, data, "order created successfully." );
+        return getResult( res, 200, data, "Order created successfully" );
     } catch ( err )
     {
         console.error( "err in webhooks events : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     };
 };

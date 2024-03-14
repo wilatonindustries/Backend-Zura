@@ -47,21 +47,20 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "commission_by_admin", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
-                    store_share_given: parseFloat( order.given_to_res ) + commision
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst ),
+                    total_commision: parseFloat( order.commission_by_admin ),
+                    store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
         } else if ( store_name )
@@ -87,20 +86,19 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "commission_by_admin", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst ),
+                    total_commision: parseFloat( order.commission_by_admin ),
                     store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
@@ -133,20 +131,19 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "commission_by_admin", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
 
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
                 storeShareList.push( {
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst ),
+                    total_commision: parseFloat( order.commission_by_admin ),
                     store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
@@ -174,19 +171,19 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                         [ Op.between ]: [ startDate, endDate ]
                     }
                 },
-                attributes: [ "id", "order_date", "bill_amount", "gst", "discount_from_restaurant", "given_to_res" ]
+                attributes: [ "id", "order_date", "bill_amount", "gst", "commission_by_admin", "given_to_res" ]
             } );
 
             orders.forEach( order =>
             {
                 const store = order.restaurant;
-                const commision = parseFloat( order.bill_amount ) * order.discount_from_restaurant / 100;
+
                 storeShareList.push( {
                     store_name: store ? store.store_name : '',
                     date: order.order_date,
-                    bill_amount: order.bill_amount,
-                    all_gst: order.gst,
-                    total_commision: commision,
+                    bill_amount: parseFloat( order.bill_amount ),
+                    all_gst: parseFloat( order.gst ),
+                    total_commision: parseFloat( order.commission_by_admin ),
                     store_share_given: parseFloat( order.given_to_res )
                 } );
             } );
@@ -210,11 +207,11 @@ exports.totalStoreShareGiven = async ( req, res ) =>
                 total_store_share_given: totalStoreShareGoven
             }
         };
-        return getResult( res, 200, data, "total store share given fetched successfully." );
+        return getResult( res, 200, data, "total store share given fetched successfully" );
     } catch ( error )
     {
         console.error( "error in fetch total store share given : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -427,12 +424,12 @@ exports.totalStoreShareToBeGiven = async ( req, res ) =>
                 total_store_share_given: totalStoreShareGoven
             }
         };
-        return getResult( res, 200, data, "total store share given fetched successfully." );
+        return getResult( res, 200, data, "total store share given fetched successfully" );
 
     } catch ( error )
     {
         console.error( "error in fetch total store share given : ", error );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
@@ -453,32 +450,33 @@ exports.paidOrUnpaid = async ( req, res ) =>
         if ( is_paid === true )
         {
             await db.orders.update( { is_paid }, { where: { id } } );
-            return getResult( res, 200, 1, "pay successfully." );
+            return getResult( res, 200, 1, "pay successfully" );
         } else
         {
             await db.orders.update( { is_paid }, { where: { id } } );
-            return getResult( res, 200, 1, "unpay successfully." );
+            return getResult( res, 200, 1, "unpay successfully" );
         }
     } catch ( err )
     {
         console.error( "err in pay : ", err );
-        return getErrorResult( res, 500, 'somthing went wrong.' );
+        return getErrorResult( res, 500, 'Somthing went wrong' );
     }
 };
 
 async function paidPayout ()
 {
-    const result = await db.restaurants_payouts.findAll( {
+    const result = await db.orders.findAll( {
         attributes: [
             [
                 Sequelize.fn(
                     'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
+                    Sequelize.fn( 'SUM', Sequelize.col( 'given_to_res' ) ),
                     0
                 ),
                 'paid_payout'
             ],
         ],
+        where: { is_paid: true }
     } );
 
     const paidPayout = parseFloat( result[ 0 ].dataValues.paid_payout );
@@ -488,20 +486,61 @@ async function paidPayout ()
 
 async function toBePaidPayout ()
 {
-    const result = await db.payout_histories.findAll( {
+    const result = await db.orders.findAll( {
         attributes: [
             [
                 Sequelize.fn(
                     'COALESCE',
-                    Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
+                    Sequelize.fn( 'SUM', Sequelize.col( 'given_to_res' ) ),
                     0
                 ),
                 'to_be_paid_payout'
             ],
         ],
+        where: { is_paid: false }
     } );
 
     const paidPayout = parseFloat( result[ 0 ].dataValues.to_be_paid_payout );
 
     return paidPayout;
 }
+
+// async function paidPayout ()
+// {
+//     const result = await db.restaurants_payouts.findAll( {
+//         attributes: [
+//             [
+//                 Sequelize.fn(
+//                     'COALESCE',
+//                     Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
+//                     0
+//                 ),
+//                 'paid_payout'
+//             ],
+//         ],
+//     } );
+
+//     const paidPayout = parseFloat( result[ 0 ].dataValues.paid_payout );
+
+//     return paidPayout;
+// }
+
+// async function toBePaidPayout ()
+// {
+//     const result = await db.payout_histories.findAll( {
+//         attributes: [
+//             [
+//                 Sequelize.fn(
+//                     'COALESCE',
+//                     Sequelize.fn( 'SUM', Sequelize.col( 'amount' ) ),
+//                     0
+//                 ),
+//                 'to_be_paid_payout'
+//             ],
+//         ],
+//     } );
+
+//     const paidPayout = parseFloat( result[ 0 ].dataValues.to_be_paid_payout );
+
+//     return paidPayout;
+// }
